@@ -1,0 +1,51 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-primary: #FFFFFF;
+  --color-secondary: #0A1628;
+  --color-accent: #00D4FF;
+  --color-background: #0A1628;
+  --color-text: #FFFFFF;
+  --font-family: 'Inter', sans-serif;
+  --border-radius: 12px;
+  --glass-intensity: 50;
+}
+
+@layer utilities {
+  .glass {
+    background: rgba(255, 255, 255, calc(var(--glass-intensity) * 0.001));
+    backdrop-filter: blur(calc(var(--glass-intensity) * 0.2px));
+    -webkit-backdrop-filter: blur(calc(var(--glass-intensity) * 0.2px));
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--border-radius);
+  }
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-text);
+  font-family: var(--font-family);
+}
+
+/* Light Mode Override */
+html.light-mode {
+  --color-primary: #0A1628;
+  --color-secondary: #FFFFFF;
+  --color-accent: #0084FF;
+  --color-background: #F8FAFC;
+  --color-text: #0A1628;
+  --glass-intensity: 30;
+}
+
+html.light-mode body {
+  background-color: #F8FAFC;
+  color: #0A1628;
+}
+
+html.light-mode .glass {
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(10, 22, 40, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}

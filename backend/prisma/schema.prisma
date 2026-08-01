@@ -1,0 +1,263 @@
+// Prisma schema for Meetvia platform
+// PostgreSQL database
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Enums ───────────────────────────────────────────────────────────────────
+
+enum ThemePreset {
+  futuristic_blue @map("futuristic-blue")
+  luxury_dark     @map("luxury-dark")
+  clean_white     @map("clean-white")
+  custom          @map("custom")
+}
+
+enum LocationType {
+  Public
+  Virtual
+  Flexible
+}
+
+enum FileType {
+  image
+  video
+}
+
+enum CityStatus {
+  active
+  inactive
+}
+
+enum InquiryStatus {
+  new_status @map("new")
+  reviewed
+  contacted
+  closed
+  rejected
+}
+
+enum ApplicationStatus {
+  pending
+  reviewing
+  approved
+  rejected
+}
+
+// ─── Models ──────────────────────────────────────────────────────────────────
+
+model AdminUser {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("admin_users")
+}
+
+model SiteSettings {
+  id                 String   @id @default(cuid())
+  siteName           String
+  siteLogo           String?
+  favicon            String?
+  metaTitle          String
+  metaDescription    String?
+  contactEmail       String?
+  contactPhone       String?
+  whatsappNumber     String?
+  whatsappMessage    String?
+  safetyCheckboxText String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@map("site_settings")
+}
+
+model ThemeSettings {
+  id                    String      @id @default(cuid())
+  activePreset          ThemePreset @default(futuristic_blue)
+  primaryColor          String
+  secondaryColor        String
+  accentColor           String
+  backgroundColor       String
+  textColor             String
+  fontFamily            String
+  borderRadius          Int         @default(12)
+  glassmorphismIntensity Int        @default(50)
+  createdAt             DateTime    @default(now())
+  updatedAt             DateTime    @updatedAt
+
+  @@map("theme_settings")
+}
+
+model HeroSlide {
+  id              String   @id @default(cuid())
+  heading         String
+  subtitle        String?
+  backgroundImage String?
+  backgroundVideo String?
+  overlayOpacity  Int      @default(40)
+  includesList    String[] @default([])
+  ctaText         String?
+  ctaLink         String?
+  displayOrder    Int      @default(0)
+  isVisible       Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("hero_slides")
+}
+
+model Service {
+  id            String       @id @default(cuid())
+  title         String
+  description   String
+  duration      String?
+  locationType  LocationType
+  image         String?
+  video         String?
+  thumbnail     String?
+  whatsIncluded String[]     @default([])
+  buttonText    String       @default("Book Now")
+  buttonLink    String?
+  isFeatured    Boolean      @default(false)
+  isVisible     Boolean      @default(true)
+  displayOrder  Int          @default(0)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  @@map("services")
+}
+
+model Media {
+  id               String   @id @default(cuid())
+  originalFilename String
+  storedFilename   String   @unique
+  fileType         FileType
+  mimeType         String
+  fileSize         Int
+  storagePath      String
+  url              String
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@map("media")
+}
+
+model FAQ {
+  id           String   @id @default(cuid())
+  question     String
+  answer       String
+  displayOrder Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("faqs")
+}
+
+model Testimonial {
+  id           String   @id @default(cuid())
+  reviewerName String
+  location     String?
+  reviewText   String
+  rating       Int?
+  image        String?
+  isVerified   Boolean  @default(false)
+  isVisible    Boolean  @default(true)
+  displayOrder Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("testimonials")
+}
+
+model City {
+  id           String     @id @default(cuid())
+  cityName     String
+  state        String
+  country      String
+  status       CityStatus @default(active)
+  displayOrder Int        @default(0)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  @@unique([cityName, state])
+  @@map("cities")
+}
+
+model ContactInquiry {
+  id              String        @id @default(cuid())
+  fullName        String
+  email           String
+  mobile          String?
+  serviceType     String
+  preferredDate   DateTime?
+  message         String
+  safetyConfirmed Boolean       @default(true)
+  status          InquiryStatus @default(new_status)
+  adminNotes      String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@map("contact_inquiries")
+}
+
+model CompanionApplication {
+  id         String            @id @default(cuid())
+  fullName   String
+  email      String
+  mobile     String
+  city       String
+  experience String
+  whyJoin    String
+  status     ApplicationStatus @default(pending)
+  adminNotes String?
+  createdAt  DateTime          @default(now())
+  updatedAt  DateTime          @updatedAt
+
+  @@map("companion_applications")
+}
+
+model LegalPage {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  title     String
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("legal_pages")
+}
+
+model SocialLink {
+  id             String   @id @default(cuid())
+  platform       String
+  url            String
+  iconIdentifier String
+  isVisible      Boolean  @default(true)
+  displayOrder   Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@map("social_links")
+}
+
+model HowItWorksStep {
+  id           String   @id @default(cuid())
+  stepNumber   Int
+  title        String
+  description  String
+  displayOrder Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("how_it_works_steps")
+}

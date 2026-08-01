@@ -1,0 +1,123 @@
+import express from 'express';
+import cors from 'cors';
+import path from 'path';
+import env from './config/env';
+import prisma from './config/db';
+import { errorHandler } from './middleware/errorHandler';
+import publicServicesRoutes from './routes/public/services';
+import publicCitiesRoutes from './routes/public/cities';
+import publicFaqRoutes from './routes/public/faq';
+import publicTestimonialsRoutes from './routes/public/testimonials';
+import publicPagesRoutes from './routes/public/pages';
+import publicFooterRoutes from './routes/public/footer';
+import publicContactRoutes from './routes/public/contact';
+import publicCompanionRoutes from './routes/public/companion';
+import publicSiteSettingsRoutes from './routes/public/siteSettings';
+import publicThemeRoutes from './routes/public/theme';
+import publicHeroRoutes from './routes/public/hero';
+import publicHowItWorksRoutes from './routes/public/howItWorks';
+import adminAuthRoutes from './routes/admin/auth';
+import adminDashboardRoutes from './routes/admin/dashboard';
+import adminInquiriesRoutes from './routes/admin/inquiries';
+import adminCompanionsRoutes from './routes/admin/companions';
+import adminPagesRoutes from './routes/admin/pages';
+import adminFooterRoutes from './routes/admin/footer';
+import adminSocialLinksRoutes from './routes/admin/socialLinks';
+import adminHowItWorksRoutes from './routes/admin/howItWorks';
+import adminServicesRoutes from './routes/admin/services';
+import adminFaqRoutes from './routes/admin/faq';
+import adminTestimonialsRoutes from './routes/admin/testimonials';
+import adminCitiesRoutes from './routes/admin/cities';
+import adminThemeRoutes from './routes/admin/theme';
+import adminHeroRoutes from './routes/admin/hero';
+import adminSiteSettingsRoutes from './routes/admin/siteSettings';
+import adminMediaRoutes from './routes/admin/media';
+
+const app = express();
+
+// Middleware
+app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Serve uploaded files statically
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+
+// API Routes - Public (no auth required)
+app.use('/api/v1/public/site-settings', publicSiteSettingsRoutes);
+app.use('/api/v1/public/theme', publicThemeRoutes);
+app.use('/api/v1/public/hero-slides', publicHeroRoutes);
+app.use('/api/v1/public/services', publicServicesRoutes);
+app.use('/api/v1/public/cities', publicCitiesRoutes);
+app.use('/api/v1/public/faq', publicFaqRoutes);
+app.use('/api/v1/public/testimonials', publicTestimonialsRoutes);
+app.use('/api/v1/public/pages', publicPagesRoutes);
+app.use('/api/v1/public/footer', publicFooterRoutes);
+app.use('/api/v1/public/how-it-works', publicHowItWorksRoutes);
+app.use('/api/v1/public/contact', publicContactRoutes);
+app.use('/api/v1/public/companion-application', publicCompanionRoutes);
+
+// API Routes - Admin (JWT required)
+app.use('/api/v1/admin/auth', adminAuthRoutes);
+app.use('/api/v1/admin/dashboard', adminDashboardRoutes);
+app.use('/api/v1/admin/media', adminMediaRoutes);
+app.use('/api/v1/admin/site-settings', adminSiteSettingsRoutes);
+app.use('/api/v1/admin/theme', adminThemeRoutes);
+app.use('/api/v1/admin/hero-slides', adminHeroRoutes);
+app.use('/api/v1/admin/services', adminServicesRoutes);
+app.use('/api/v1/admin/faq', adminFaqRoutes);
+app.use('/api/v1/admin/testimonials', adminTestimonialsRoutes);
+app.use('/api/v1/admin/cities', adminCitiesRoutes);
+app.use('/api/v1/admin/pages', adminPagesRoutes);
+app.use('/api/v1/admin/footer', adminFooterRoutes);
+app.use('/api/v1/admin/social-links', adminSocialLinksRoutes);
+app.use('/api/v1/admin/inquiries', adminInquiriesRoutes);
+app.use('/api/v1/admin/companions', adminCompanionsRoutes);
+app.use('/api/v1/admin/how-it-works', adminHowItWorksRoutes);
+
+// Health check endpoint
+app.get('/api/v1/health', (_req, res) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+// 404 handler for undefined routes
+app.use((_req, res) => {
+  res.status(404).json({
+    success: false,
+    error: { message: 'Route not found' },
+  });
+});
+
+// Global error handler (must be after all routes)
+app.use(errorHandler);
+
+// Start server only if not in test environment
+if (env.NODE_ENV !== 'test') {
+  const startServer = async () => {
+    // Verify database connection
+    try {
+      await prisma.$connect();
+      console.log('PostgreSQL connected via Prisma');
+    } catch (error) {
+      console.error('Database connection error:', error);
+      process.exit(1);
+    }
+
+    app.listen(env.PORT, () => {
+      console.log(`Server running on port ${env.PORT} in ${env.NODE_ENV} mode`);
+    });
+  };
+
+  startServer();
+
+  // Graceful shutdown
+  const shutdown = async () => {
+    await prisma.$disconnect();
+    process.exit(0);
+  };
+
+  process.on('SIGINT', shutdown);
+  process.on('SIGTERM', shutdown);
+}
+
+export default app;
