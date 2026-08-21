@@ -3,13 +3,13 @@
 @tailwind utilities;
 
 :root {
-  --color-primary: #FFFFFF;
-  --color-secondary: #0A1628;
-  --color-accent: #00D4FF;
-  --color-background: #0A1628;
-  --color-text: #FFFFFF;
+  --color-primary: #ffffff;
+  --color-secondary: #07111f;
+  --color-accent: #8b5cf6;
+  --color-background: #050914;
+  --color-text: #f8fafc;
   --font-family: 'Inter', sans-serif;
-  --border-radius: 12px;
+  --border-radius: 16px;
   --glass-intensity: 50;
 }
 
@@ -24,28 +24,38 @@
 }
 
 body {
-  background-color: var(--color-background);
+  background: var(--color-background);
   color: var(--color-text);
   font-family: var(--font-family);
 }
 
-/* Light Mode Override */
+/* GoWith travel-companion visual language */
+.gowith-gradient {
+  background: radial-gradient(circle at 70% 20%, rgba(139, 92, 246, 0.18), transparent 34%),
+    radial-gradient(circle at 20% 80%, rgba(34, 211, 238, 0.12), transparent 32%);
+}
+
+.gowith-glow {
+  box-shadow: 0 0 80px rgba(139, 92, 246, 0.18), 0 0 30px rgba(34, 211, 238, 0.08);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
 html.light-mode {
-  --color-primary: #0A1628;
-  --color-secondary: #FFFFFF;
-  --color-accent: #0084FF;
-  --color-background: #F8FAFC;
-  --color-text: #0A1628;
+  --color-primary: #0f172a;
+  --color-secondary: #ffffff;
+  --color-accent: #7c3aed;
+  --color-background: #f8fafc;
+  --color-text: #0f172a;
   --glass-intensity: 30;
 }
 
-html.light-mode body {
-  background-color: #F8FAFC;
-  color: #0A1628;
-}
-
-html.light-mode .glass {
-  background: rgba(255, 255, 255, 0.7);
-  border: 1px solid rgba(10, 22, 40, 0.1);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-}
+html.light-mode body { background-color: #f8fafc; color: #0f172a; }
+html.light-mode .glass { background: rgba(255, 255, 255, 0.7); border-color: rgba(15, 23, 42, 0.1); }
