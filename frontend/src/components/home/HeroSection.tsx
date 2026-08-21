@@ -2,7 +2,7 @@
 
 import { useRef, useEffect, useState, useCallback } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Compass, MapPin, Users, Sparkles } from 'lucide-react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
@@ -35,45 +35,28 @@ export default function HeroSection({ slides }: HeroSectionProps) {
     setCurrentIndex((prev) => (prev - 1 + slides.length) % slides.length);
   }, [slides.length]);
 
-  // GSAP ScrollTrigger animation setup
   useEffect(() => {
     if (prefersReducedMotion) return;
-
     const section = sectionRef.current;
     const heading = headingRef.current;
     const subtitle = subtitleRef.current;
     const includes = includesRef.current;
     const cta = ctaRef.current;
-
     if (!section || !heading || !subtitle || !includes || !cta) return;
 
     const elements = [heading, subtitle, includes, cta];
-
-    // Set initial state - slightly faded, with subtle reveal on scroll
     gsap.set(elements, { opacity: 0.9, y: 5 });
-
     const tl = gsap.timeline({
-      scrollTrigger: {
-        trigger: section,
-        start: 'top top',
-        end: '+=50%',
-        pin: true,
-        scrub: 0.5,
-      },
+      scrollTrigger: { trigger: section, start: 'top top', end: '+=50%', pin: true, scrub: 0.5 },
     });
-
-    // Staggered full reveal: heading → subtitle → includes → CTA
     tl.to(heading, { opacity: 1, y: 0, duration: 0.25 })
       .to(subtitle, { opacity: 1, y: 0, duration: 0.25 })
       .to(includes, { opacity: 1, y: 0, duration: 0.25 })
       .to(cta, { opacity: 1, y: 0, duration: 0.25 });
-
     return () => {
       tl.kill();
       ScrollTrigger.getAll().forEach((trigger) => {
-        if (trigger.vars.trigger === section) {
-          trigger.kill();
-        }
+        if (trigger.vars.trigger === section) trigger.kill();
       });
     };
   }, [prefersReducedMotion, currentIndex]);
@@ -81,160 +64,65 @@ export default function HeroSection({ slides }: HeroSectionProps) {
   if (!slides.length) return null;
 
   return (
-    <section
-      ref={sectionRef}
-      className="relative w-full h-screen overflow-hidden"
-      aria-label="Hero section"
-    >
-      {/* Background slides with framer-motion transitions */}
+    <section ref={sectionRef} className="relative min-h-screen w-full overflow-hidden bg-[#06111f]" aria-label="GoWith travel companion hero">
       <AnimatePresence mode="wait">
-        <motion.div
-          key={currentSlide._id}
-          className="absolute inset-0"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.6 }}
-        >
-          {/* Background image or video */}
+        <motion.div key={currentSlide._id} className="absolute inset-0" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.6 }}>
           {currentSlide.backgroundVideo ? (
-            <div className="absolute inset-0 flex items-center justify-center">
-              {/* 3D-styled card frame for video */}
-              <div
-                className="relative w-full h-full md:w-[85%] md:h-[85%] md:rounded-2xl md:overflow-hidden"
-                style={{
-                  perspective: '1000px',
-                  transformStyle: 'preserve-3d',
-                }}
-              >
-                <div
-                  className="w-full h-full md:shadow-2xl md:border md:border-white/10 md:rounded-2xl overflow-hidden"
-                  style={{
-                    transform: 'rotateX(2deg) rotateY(-1deg)',
-                    transformStyle: 'preserve-3d',
-                  }}
-                >
-                  <video
-                    src={currentSlide.backgroundVideo}
-                    autoPlay
-                    muted
-                    loop
-                    playsInline
-                    className="w-full h-full object-cover"
-                    aria-hidden="true"
-                  />
-                </div>
-              </div>
+            <div className="absolute inset-0 opacity-45">
+              <video src={currentSlide.backgroundVideo} autoPlay muted loop playsInline className="h-full w-full object-cover" aria-hidden="true" />
             </div>
           ) : currentSlide.backgroundImage ? (
-            <div
-              className="absolute inset-0 bg-cover bg-center"
-              style={{
-                backgroundImage: `url(${currentSlide.backgroundImage})`,
-              }}
-              role="img"
-              aria-label={currentSlide.heading}
-            />
-          ) : (
-            <div className="absolute inset-0 bg-secondary" />
-          )}
-
-          {/* Dark overlay with configurable opacity */}
-          <div
-            className="absolute inset-0 bg-black"
-            style={{ opacity: currentSlide.overlayOpacity / 100 }}
-            aria-hidden="true"
-          />
+            <div className="absolute inset-0 bg-cover bg-center opacity-45" style={{ backgroundImage: `url(${currentSlide.backgroundImage})` }} role="img" aria-label={currentSlide.heading} />
+          ) : null}
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_35%,rgba(14,165,233,0.24),transparent_34%),linear-gradient(115deg,#06111f_12%,rgba(6,17,31,0.9)_48%,rgba(7,35,55,0.78)_100%)]" />
+          <div className="absolute inset-0 bg-black/20" />
         </motion.div>
       </AnimatePresence>
 
-      {/* Hero text content */}
-      <div className="relative z-10 flex items-center justify-center h-full px-6 md:px-12 lg:px-24">
-        <div className="max-w-4xl text-center">
-          <h1
-            ref={headingRef}
-            className="text-3xl md:text-5xl lg:text-6xl font-bold text-primary mb-4 leading-tight"
-            style={prefersReducedMotion ? {} : undefined}
-          >
-            {currentSlide.heading}
-          </h1>
+      <div className="pointer-events-none absolute right-[-10%] top-[8%] hidden h-[78vh] w-[58vw] lg:block" aria-hidden="true">
+        <motion.div className="absolute left-1/2 top-1/2 h-[360px] w-[360px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-cyan-200/20 bg-[radial-gradient(circle_at_32%_28%,#7dd3fc_0%,#0e7490_18%,#075985_46%,#082f49_72%,#06111f_100%)] shadow-[0_0_120px_rgba(34,211,238,0.2)]" animate={prefersReducedMotion ? undefined : { y: [-8, 8, -8], rotate: [0, 2, 0] }} transition={{ duration: 9, repeat: Infinity, ease: 'easeInOut' }} style={{ transformStyle: 'preserve-3d' }}>
+          <div className="absolute inset-[12%] rounded-full border border-white/10" />
+          <div className="absolute left-[18%] top-[22%] h-16 w-24 rotate-[-18deg] rounded-[50%] border border-emerald-200/20 bg-emerald-300/10" />
+          <div className="absolute bottom-[18%] right-[16%] h-12 w-20 rotate-[18deg] rounded-[50%] border border-emerald-200/20 bg-emerald-300/10" />
+          <div className="absolute left-1/2 top-1/2 h-[125%] w-[38%] -translate-x-1/2 -translate-y-1/2 rounded-full border border-cyan-100/20 rotate-[62deg]" />
+        </motion.div>
 
-          <p
-            ref={subtitleRef}
-            className="text-base md:text-xl lg:text-2xl text-primary/80 mb-6 max-w-2xl mx-auto"
-            style={prefersReducedMotion ? {} : undefined}
-          >
-            {currentSlide.subtitle}
-          </p>
+        <motion.div className="absolute left-[8%] top-[17%] rounded-2xl border border-white/15 bg-white/10 px-4 py-3 shadow-2xl backdrop-blur-xl" animate={prefersReducedMotion ? undefined : { y: [-7, 7, -7], rotate: [-2, 1, -2] }} transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}>
+          <div className="flex items-center gap-3"><span className="rounded-xl bg-cyan-300/15 p-2 text-cyan-200"><MapPin size={18} /></span><div><p className="text-xs text-white/55">Explore</p><p className="text-sm font-semibold text-white">New Delhi</p></div></div>
+        </motion.div>
 
-          {currentSlide.includesList && currentSlide.includesList.length > 0 && (
-            <ul
-              ref={includesRef}
-              className="flex flex-wrap justify-center gap-3 mb-8"
-              style={prefersReducedMotion ? {} : undefined}
-            >
-              {currentSlide.includesList.map((item, idx) => (
-                <li
-                  key={idx}
-                  className="px-4 py-2 glass text-sm text-primary/90"
-                >
-                  {item}
-                </li>
-              ))}
+        <motion.div className="absolute bottom-[19%] right-[7%] rounded-2xl border border-white/15 bg-white/10 px-4 py-3 shadow-2xl backdrop-blur-xl" animate={prefersReducedMotion ? undefined : { y: [8, -8, 8], rotate: [2, -1, 2] }} transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut' }}>
+          <div className="flex items-center gap-3"><span className="rounded-xl bg-violet-300/15 p-2 text-violet-200"><Users size={18} /></span><div><p className="text-xs text-white/55">Travel with</p><p className="text-sm font-semibold text-white">Trusted locals</p></div></div>
+        </motion.div>
+
+        <motion.div className="absolute right-[25%] top-[8%] rounded-full border border-white/10 bg-white/10 p-3 text-cyan-200 backdrop-blur-xl" animate={prefersReducedMotion ? undefined : { y: [0, -12, 0] }} transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}><Compass size={22} /></motion.div>
+      </div>
+
+      <div className="relative z-10 flex min-h-screen items-center px-6 py-28 md:px-12 lg:px-24">
+        <div className="max-w-3xl">
+          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-cyan-200/15 bg-white/5 px-4 py-2 text-xs font-medium tracking-wide text-cyan-100 backdrop-blur-md"><Sparkles size={14} /><span>TRAVEL • PEOPLE • EXPERIENCES</span></div>
+          <h1 ref={headingRef} className="mb-5 max-w-3xl text-4xl font-bold leading-[1.05] tracking-[-0.03em] text-white md:text-6xl lg:text-7xl">{currentSlide.heading || 'Find someone to go with.'}</h1>
+          <p ref={subtitleRef} className="mb-7 max-w-2xl text-base leading-7 text-slate-200/80 md:text-xl">{currentSlide.subtitle || 'Discover trusted locals, travel companions and experiences wherever your journey takes you.'}</p>
+
+          {currentSlide.includesList?.length > 0 && (
+            <ul ref={includesRef} className="mb-8 flex max-w-2xl flex-wrap gap-2.5">
+              {currentSlide.includesList.map((item, idx) => <li key={idx} className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-100/85 backdrop-blur-md">{item}</li>)}
             </ul>
           )}
 
-          {currentSlide.ctaText && (
-            <div
-              ref={ctaRef}
-              style={prefersReducedMotion ? {} : undefined}
-            >
-              <Button
-                href={currentSlide.ctaLink || '#'}
-                variant="primary"
-                size="lg"
-              >
-                {currentSlide.ctaText}
-              </Button>
-            </div>
-          )}
+          <div ref={ctaRef} className="flex flex-wrap items-center gap-4">
+            {currentSlide.ctaText && <Button href={currentSlide.ctaLink || '/browse'} variant="primary" size="lg">{currentSlide.ctaText}</Button>}
+            <a href="/companions" className="rounded-full border border-white/15 bg-white/5 px-6 py-3 text-sm font-semibold text-white backdrop-blur-md transition hover:bg-white/10">Meet companions</a>
+          </div>
+          <div className="mt-10 flex flex-wrap gap-6 text-xs text-slate-300/65"><span>✓ Verified companions</span><span>✓ Public experiences</span><span>✓ Travel-first discovery</span></div>
         </div>
       </div>
 
-      {/* Navigation arrows — hidden if only one slide */}
       {hasMultipleSlides && (
         <>
-          <button
-            onClick={goToPrev}
-            className="absolute left-4 top-1/2 -translate-y-1/2 z-20 p-2 rounded-full glass text-primary hover:bg-white/20 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-accent/50"
-            aria-label="Previous slide"
-          >
-            <ChevronLeft className="w-6 h-6" />
-          </button>
-          <button
-            onClick={goToNext}
-            className="absolute right-4 top-1/2 -translate-y-1/2 z-20 p-2 rounded-full glass text-primary hover:bg-white/20 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-accent/50"
-            aria-label="Next slide"
-          >
-            <ChevronRight className="w-6 h-6" />
-          </button>
-
-          {/* Slide indicators */}
-          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex gap-2">
-            {slides.map((_, idx) => (
-              <button
-                key={idx}
-                onClick={() => setCurrentIndex(idx)}
-                className={`w-2.5 h-2.5 rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-accent/50 ${
-                  idx === currentIndex
-                    ? 'bg-accent'
-                    : 'bg-white/40 hover:bg-white/60'
-                }`}
-                aria-label={`Go to slide ${idx + 1}`}
-                aria-current={idx === currentIndex ? 'true' : undefined}
-              />
-            ))}
-          </div>
+          <button onClick={goToPrev} className="absolute left-4 top-1/2 z-20 -translate-y-1/2 rounded-full border border-white/10 bg-white/5 p-2 text-white backdrop-blur-md transition hover:bg-white/10 md:left-6" aria-label="Previous slide"><ChevronLeft className="h-5 w-5" /></button>
+          <button onClick={goToNext} className="absolute right-4 top-1/2 z-20 -translate-y-1/2 rounded-full border border-white/10 bg-white/5 p-2 text-white backdrop-blur-md transition hover:bg-white/10 md:right-6" aria-label="Next slide"><ChevronRight className="h-5 w-5" /></button>
+          <div className="absolute bottom-8 left-1/2 z-20 flex -translate-x-1/2 gap-2">{slides.map((_, idx) => <button key={idx} onClick={() => setCurrentIndex(idx)} className={`h-1.5 rounded-full transition-all ${idx === currentIndex ? 'w-8 bg-cyan-300' : 'w-2 bg-white/30'}`} aria-label={`Go to slide ${idx + 1}`} aria-current={idx === currentIndex ? 'true' : undefined} />)}</div>
         </>
       )}
     </section>
