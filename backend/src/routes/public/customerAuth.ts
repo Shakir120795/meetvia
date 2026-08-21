@@ -31,6 +31,13 @@ router.post('/otp/request', async (req, res, next) => {
       },
     });
   } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unable to request OTP';
+    if (message === 'OTP_RATE_LIMITED') {
+      return res.status(429).json({ success: false, error: { code: message, message: 'Too many OTP requests. Please try again later.' } });
+    }
+    if (message === 'OTP_COOLDOWN') {
+      return res.status(429).json({ success: false, error: { code: message, message: 'Please wait before requesting another OTP.' } });
+    }
     next(error);
   }
 });
