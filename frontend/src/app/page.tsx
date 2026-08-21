@@ -22,7 +22,7 @@ async function fetchData<T>(path: string): Promise<T | null> {
 export async function generateMetadata(): Promise<Metadata> {
   const siteSettings = await fetchData<ISiteSettings>('/api/v1/public/site-settings');
   return {
-    title: siteSettings?.metaTitle || 'GoWith — Find someone to go with.',
+    title: siteSettings?.metaTitle || 'MeetVia — Find someone to go with.',
     description: siteSettings?.metaDescription || 'Find trusted local companions for travel, city exploration and experiences.',
   };
 }
@@ -38,7 +38,7 @@ export default async function Home() {
     fetchData<ISiteSettings>('/api/v1/public/site-settings'),
     fetchData<IAboutPage>('/api/v1/public/pages/about'),
   ]);
-  const jsonLd = { '@context': 'https://schema.org', '@type': 'Organization', name: 'GoWith', description: 'Travel companions and local experiences.' };
+  const jsonLd = { '@context': 'https://schema.org', '@type': 'Organization', name: 'MeetVia', description: 'Travel companions and local experiences.' };
   return (
     <main className="flex flex-col min-h-screen">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
@@ -47,7 +47,7 @@ export default async function Home() {
       <BecomeCompanion /><AboutSection title={aboutPage?.title} content={aboutPage?.content} />
       <CitiesSection cities={cities || []} /><FAQPreview faqs={faqs || []} />
       <TestimonialsPreview testimonials={testimonials || []} />
-      <ContactSection siteSettings={siteSettings || { _id: '', siteName: 'GoWith', metaTitle: 'GoWith', createdAt: '', updatedAt: '' }} />
+      <ContactSection siteSettings={siteSettings || { _id: '', siteName: 'MeetVia', metaTitle: 'MeetVia', createdAt: '', updatedAt: '' }} />
     </main>
   );
 }
