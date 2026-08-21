@@ -33,7 +33,7 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="space-y-4">
-            <Link href="/" className="text-2xl font-bold text-accent tracking-tight">GoWith</Link>
+            <Link href="/" className="text-2xl font-bold text-accent tracking-tight">MeetVia</Link>
             <p className="text-foreground/70 text-sm max-w-xs">{footerData?.description || 'Find trusted companions for travel, city exploration and shared experiences.'}</p>
           </div>
           <div className="space-y-4">
@@ -45,7 +45,7 @@ export default function Footer() {
             <div className="flex items-center gap-4">{visibleLinks.map((social) => { const IconComponent = ICON_MAP[social.platform.toLowerCase()] || ICON_MAP[social.iconIdentifier?.toLowerCase()]; if (!IconComponent) return null; return <a key={social._id} href={social.url} target="_blank" rel="noopener noreferrer" aria-label={`Follow us on ${social.platform}`} className="text-foreground/70 hover:text-accent transition-colors"><IconComponent className="w-8 h-8" /></a>; })}</div>
           </div>
         </div>
-        <div className="mt-10 pt-6 border-t border-white/10 text-center"><p className="text-xs text-foreground/50">&copy; {new Date().getFullYear()} GoWith. All rights reserved.</p></div>
+        <div className="mt-10 pt-6 border-t border-white/10 text-center"><p className="text-xs text-foreground/50">&copy; {new Date().getFullYear()} MeetVia. All rights reserved.</p></div>
       </div>
     </footer>
   );
