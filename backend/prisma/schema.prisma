@@ -1,15 +1,8 @@
 // Prisma schema for Meetvia → GoWith platform
 // PostgreSQL database
 
-generator client {
-  provider = "prisma-client-js"
-}
-
-datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-}
-
+generator client { provider = "prisma-client-js" }
+datasource db { provider = "postgresql" url = env("DATABASE_URL") }
 enum ThemePreset { futuristic_blue @map("futuristic-blue") luxury_dark @map("luxury-dark") clean_white @map("clean-white") custom @map("custom") }
 enum LocationType { Public Virtual Flexible }
 enum FileType { image video }
@@ -20,9 +13,10 @@ enum UserStatus { ACTIVE SUSPENDED DEACTIVATED }
 enum UserRole { CUSTOMER COMPANION ADMIN }
 enum ExperienceStatus { DRAFT PUBLISHED SUSPENDED ARCHIVED }
 enum ExperienceType { LOCAL CITY TRAVEL }
+enum CompanionRequestStatus { PENDING ACCEPTED DECLINED CANCELLED COMPLETED }
 
 model AdminUser { id String @id @default(cuid()) email String @unique password String name String createdAt DateTime @default(now()) updatedAt DateTime @updatedAt @@map("admin_users") }
-model User { id String @id @default(cuid()) email String? @unique mobile String? @unique status UserStatus @default(ACTIVE) emailVerifiedAt DateTime? mobileVerifiedAt DateTime? createdAt DateTime @default(now()) updatedAt DateTime @updatedAt profile UserProfile? socialAccounts SocialAccount[] sessions Session[] otpRequests OtpRequest[] roles UserRoleAssignment[] experiences Experience[] @@index([status]) @@map("users") }
+model User { id String @id @default(cuid()) email String? @unique mobile String? @unique status UserStatus @default(ACTIVE) emailVerifiedAt DateTime? mobileVerifiedAt DateTime? createdAt DateTime @default(now()) updatedAt DateTime @updatedAt profile UserProfile? socialAccounts SocialAccount[] sessions Session[] otpRequests OtpRequest[] roles UserRoleAssignment[] experiences Experience[] sentCompanionRequests CompanionRequest[] @relation("requester") receivedCompanionRequests CompanionRequest[] @relation("companion") @@index([status]) @@map("users") }
 model UserProfile { id String @id @default(cuid()) userId String @unique firstName String? lastName String? displayName String? avatarUrl String? bio String? countryCode String? preferredLanguage String? preferredCurrency String? createdAt DateTime @default(now()) updatedAt DateTime @updatedAt user User @relation(fields: [userId], references: [id], onDelete: Cascade) @@map("user_profiles") }
 model Role { id String @id @default(cuid()) name UserRole @unique description String? assignments UserRoleAssignment[] createdAt DateTime @default(now()) updatedAt DateTime @updatedAt @@map("roles") }
 model UserRoleAssignment { id String @id @default(cuid()) userId String roleId String createdAt DateTime @default(now()) user User @relation(fields: [userId], references: [id], onDelete: Cascade) role Role @relation(fields: [roleId], references: [id], onDelete: Cascade) @@unique([userId, roleId]) @@index([roleId]) @@map("user_role_assignments") }
@@ -36,40 +30,11 @@ model Service { id String @id @default(cuid()) title String description String d
 model Media { id String @id @default(cuid()) originalFilename String storedFilename String @unique fileType FileType mimeType String fileSize Int storagePath String url String createdAt DateTime @default(now()) updatedAt DateTime @updatedAt @@map("media") }
 model FAQ { id String @id @default(cuid()) question String answer String displayOrder Int @default(0) createdAt DateTime @default(now()) updatedAt DateTime @updatedAt @@map("faqs") }
 model Testimonial { id String @id @default(cuid()) reviewerName String location String? reviewText String rating Int? image String? isVerified Boolean @default(false) isVisible Boolean @default(true) displayOrder Int @default(0) createdAt DateTime @default(now()) updatedAt DateTime @updatedAt @@map("testimonials") }
-model City { id String @id @default(cuid()) cityName String state String country String status CityStatus @default(active) displayOrder Int @default(0) createdAt DateTime @default(now()) updatedAt DateTime @updatedAt @@unique([cityName, state]) experiences Experience[] @@map("cities") }
+model City { id String @id @default(cuid()) cityName String state String country String status CityStatus @default(active) displayOrder Int @default(0) createdAt DateTime @default(now()) updatedAt DateTime @updatedAt @@unique([cityName, state]) experiences Experience[] companionRequests CompanionRequest[] @@map("cities") }
 model ContactInquiry { id String @id @default(cuid()) fullName String email String mobile String? serviceType String preferredDate DateTime? message String safetyConfirmed Boolean @default(true) status InquiryStatus @default(new_status) adminNotes String? createdAt DateTime @default(now()) updatedAt DateTime @updatedAt @@map("contact_inquiries") }
 model CompanionApplication { id String @id @default(cuid()) fullName String email String mobile String city String experience String whyJoin String status ApplicationStatus @default(pending) adminNotes String? createdAt DateTime @default(now()) updatedAt DateTime @updatedAt @@map("companion_applications") }
 model LegalPage { id String @id @default(cuid()) slug String @unique title String content String createdAt DateTime @default(now()) updatedAt DateTime @updatedAt @@map("legal_pages") }
 model SocialLink { id String @id @default(cuid()) platform String url String iconIdentifier String isVisible Boolean @default(true) displayOrder Int @default(0) createdAt DateTime @default(now()) updatedAt DateTime @updatedAt @@map("social_links") }
 model HowItWorksStep { id String @id @default(cuid()) stepNumber Int title String description String displayOrder Int @default(0) createdAt DateTime @default(now()) updatedAt DateTime @updatedAt @@map("how_it_works_steps") }
-
-model Experience {
-  id String @id @default(cuid())
-  companionId String
-  cityId String?
-  title String
-  slug String @unique
-  description String
-  type ExperienceType @default(LOCAL)
-  status ExperienceStatus @default(DRAFT)
-  category String
-  durationMinutes Int
-  priceMinor Int
-  currency String @default("INR")
-  languages String[] @default([])
-  interests String[] @default([])
-  inclusions String[] @default([])
-  exclusions String[] @default([])
-  meetingPoint String?
-  mediaUrls String[] @default([])
-  timezone String @default("UTC")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  companion User @relation(fields: [companionId], references: [id], onDelete: Restrict)
-  city City? @relation(fields: [cityId], references: [id], onDelete: SetNull)
-  @@index([companionId, status])
-  @@index([cityId, status])
-  @@index([category, status])
-  @@index([type, status])
-  @@map("experiences")
-}
+model Experience { id String @id @default(cuid()) companionId String cityId String? title String slug String @unique description String type ExperienceType @default(LOCAL) status ExperienceStatus @default(DRAFT) category String durationMinutes Int priceMinor Int currency String @default("INR") languages String[] @default([]) interests String[] @default([]) inclusions String[] @default([]) exclusions String[] @default([]) meetingPoint String? mediaUrls String[] @default([]) timezone String @default("UTC") createdAt DateTime @default(now()) updatedAt DateTime @updatedAt companion User @relation(fields: [companionId], references: [id], onDelete: Restrict) city City? @relation(fields: [cityId], references: [id], onDelete: SetNull) @@index([companionId, status]) @@index([cityId, status]) @@index([category, status]) @@index([type, status]) @@map("experiences") }
+model CompanionRequest { id String @id @default(cuid()) requesterId String companionId String cityId String? experienceId String? startAt DateTime endAt DateTime? message String? status CompanionRequestStatus @default(PENDING) createdAt DateTime @default(now()) updatedAt DateTime @updatedAt requester User @relation("requester", fields: [requesterId], references: [id], onDelete: Cascade) companion User @relation("companion", fields: [companionId], references: [id], onDelete: Cascade) city City? @relation(fields: [cityId], references: [id], onDelete: SetNull) experience Experience? @relation(fields: [experienceId], references: [id], onDelete: SetNull) @@index([requesterId, status]) @@index([companionId, status]) @@index([cityId, startAt]) @@map("companion_requests") }
