@@ -45,7 +45,7 @@ export default function Navbar() {
     <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'glass shadow-lg' : 'glass'}`}>
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" aria-label="Main navigation">
         <div className="flex items-center justify-between h-16">
-          <Link href="/" className="text-2xl font-bold text-accent tracking-tight">GoWith</Link>
+          <Link href="/" className="text-2xl font-bold text-accent tracking-tight">MeetVia</Link>
           <ul className="hidden md:flex items-center space-x-8">
             {NAV_LINKS.map((link) => <li key={link.href}><Link href={link.href} className={`relative py-2 text-sm font-medium transition-colors duration-200 ${isActive(link.href) ? 'text-accent' : 'text-foreground/80 hover:text-accent'}`}>{link.label}{isActive(link.href) && <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-accent rounded-full" />}</Link></li>)}
           </ul>
