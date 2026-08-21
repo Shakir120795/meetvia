@@ -4,6 +4,7 @@ import HowItWorks from '@/components/home/HowItWorks';
 import SafetySection from '@/components/home/SafetySection';
 import ServicesPreview from '@/components/home/ServicesPreview';
 import BecomeCompanion from '@/components/home/BecomeCompanion';
+import CompanionPreview from '@/components/home/CompanionPreview';
 import CitiesSection from '@/components/home/CitiesSection';
 import FAQPreview from '@/components/home/FAQPreview';
 import TestimonialsPreview from '@/components/home/TestimonialsPreview';
@@ -21,33 +22,13 @@ async function fetchData<T>(path: string): Promise<T | null> {
 
 export async function generateMetadata(): Promise<Metadata> {
   const siteSettings = await fetchData<ISiteSettings>('/api/v1/public/site-settings');
-  return {
-    title: siteSettings?.metaTitle || 'MeetVia — Find someone to go with.',
-    description: siteSettings?.metaDescription || 'Find trusted local companions for travel, city exploration and experiences.',
-  };
+  return { title: siteSettings?.metaTitle || 'MeetVia — Find someone to go with.', description: siteSettings?.metaDescription || 'Find trusted local companions for travel, city exploration and experiences.' };
 }
 
 export default async function Home() {
   const [slides, steps, services, cities, faqs, testimonials, siteSettings, aboutPage] = await Promise.all([
-    fetchData<IHeroSlide[]>('/api/v1/public/hero-slides'),
-    fetchData<IHowItWorksStep[]>('/api/v1/public/how-it-works'),
-    fetchData<IService[]>('/api/v1/public/services/featured'),
-    fetchData<ICity[]>('/api/v1/public/cities'),
-    fetchData<IFAQ[]>('/api/v1/public/faq/preview'),
-    fetchData<ITestimonial[]>('/api/v1/public/testimonials/preview'),
-    fetchData<ISiteSettings>('/api/v1/public/site-settings'),
-    fetchData<IAboutPage>('/api/v1/public/pages/about'),
+    fetchData<IHeroSlide[]>('/api/v1/public/hero-slides'), fetchData<IHowItWorksStep[]>('/api/v1/public/how-it-works'), fetchData<IService[]>('/api/v1/public/services/featured'), fetchData<ICity[]>('/api/v1/public/cities'), fetchData<IFAQ[]>('/api/v1/public/faq/preview'), fetchData<ITestimonial[]>('/api/v1/public/testimonials/preview'), fetchData<ISiteSettings>('/api/v1/public/site-settings'), fetchData<IAboutPage>('/api/v1/public/pages/about'),
   ]);
   const jsonLd = { '@context': 'https://schema.org', '@type': 'Organization', name: 'MeetVia', description: 'Travel companions and local experiences.' };
-  return (
-    <main className="flex flex-col min-h-screen">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      <HeroSection slides={slides || []} />
-      <HowItWorks steps={steps || []} /><SafetySection /><ServicesPreview services={services || []} />
-      <BecomeCompanion /><AboutSection title={aboutPage?.title} content={aboutPage?.content} />
-      <CitiesSection cities={cities || []} /><FAQPreview faqs={faqs || []} />
-      <TestimonialsPreview testimonials={testimonials || []} />
-      <ContactSection siteSettings={siteSettings || { _id: '', siteName: 'MeetVia', metaTitle: 'MeetVia', createdAt: '', updatedAt: '' }} />
-    </main>
-  );
+  return <main className="flex min-h-screen flex-col"><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} /><HeroSection slides={slides || []} /><HowItWorks steps={steps || []} /><SafetySection /><ServicesPreview services={services || []} /><CompanionPreview /><BecomeCompanion /><AboutSection title={aboutPage?.title} content={aboutPage?.content} /><CitiesSection cities={cities || []} /><FAQPreview faqs={faqs || []} /><TestimonialsPreview testimonials={testimonials || []} /><ContactSection siteSettings={siteSettings || { _id: '', siteName: 'MeetVia', metaTitle: 'MeetVia', createdAt: '', updatedAt: '' }} /></main>;
 }
