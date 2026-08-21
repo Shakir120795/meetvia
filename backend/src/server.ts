@@ -20,6 +20,7 @@ import publicCustomerAuthRoutes from './routes/public/customerAuth';
 import publicCustomerMeRoutes from './routes/public/customerMe';
 import publicExperiencesRoutes from './routes/public/experiences';
 import publicCompanionRequestsRoutes from './routes/public/companionRequests';
+import publicCompanionAvailabilityRoutes from './routes/public/companionAvailability';
 import adminAuthRoutes from './routes/admin/auth';
 import adminDashboardRoutes from './routes/admin/dashboard';
 import adminInquiriesRoutes from './routes/admin/inquiries';
@@ -42,7 +43,6 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
-
 app.use('/api/v1/public/site-settings', publicSiteSettingsRoutes);
 app.use('/api/v1/public/theme', publicThemeRoutes);
 app.use('/api/v1/public/hero-slides', publicHeroRoutes);
@@ -50,6 +50,7 @@ app.use('/api/v1/public/services', publicServicesRoutes);
 app.use('/api/v1/public/cities', publicCitiesRoutes);
 app.use('/api/v1/public/experiences', publicExperiencesRoutes);
 app.use('/api/v1/public/companion-requests', publicCompanionRequestsRoutes);
+app.use('/api/v1/public/companion-availability', publicCompanionAvailabilityRoutes);
 app.use('/api/v1/public/faq', publicFaqRoutes);
 app.use('/api/v1/public/testimonials', publicTestimonialsRoutes);
 app.use('/api/v1/public/pages', publicPagesRoutes);
@@ -59,7 +60,6 @@ app.use('/api/v1/public/contact', publicContactRoutes);
 app.use('/api/v1/public/companion-application', publicCompanionRoutes);
 app.use('/api/v1/public/auth', publicCustomerAuthRoutes);
 app.use('/api/v1/public/me', publicCustomerMeRoutes);
-
 app.use('/api/v1/admin/auth', adminAuthRoutes);
 app.use('/api/v1/admin/dashboard', adminDashboardRoutes);
 app.use('/api/v1/admin/media', adminMediaRoutes);
@@ -76,20 +76,13 @@ app.use('/api/v1/admin/social-links', adminSocialLinksRoutes);
 app.use('/api/v1/admin/inquiries', adminInquiriesRoutes);
 app.use('/api/v1/admin/companions', adminCompanionsRoutes);
 app.use('/api/v1/admin/how-it-works', adminHowItWorksRoutes);
-
 app.get('/api/v1/health', (_req, res) => res.json({ status: 'ok', timestamp: new Date().toISOString() }));
 app.use((_req, res) => res.status(404).json({ success: false, error: { message: 'Route not found' } }));
 app.use(errorHandler);
-
 if (env.NODE_ENV !== 'test') {
-  const startServer = async () => {
-    try { await prisma.$connect(); console.log('PostgreSQL connected via Prisma'); }
-    catch (error) { console.error('Database connection error:', error); process.exit(1); }
-    app.listen(env.PORT, () => console.log(`Server running on port ${env.PORT} in ${env.NODE_ENV} mode`));
-  };
+  const startServer = async () => { try { await prisma.$connect(); console.log('PostgreSQL connected via Prisma'); } catch (error) { console.error('Database connection error:', error); process.exit(1); } app.listen(env.PORT, () => console.log(`Server running on port ${env.PORT} in ${env.NODE_ENV} mode`)); };
   startServer();
   const shutdown = async () => { await prisma.$disconnect(); process.exit(0); };
-  process.on('SIGINT', shutdown);
-  process.on('SIGTERM', shutdown);
+  process.on('SIGINT', shutdown); process.on('SIGTERM', shutdown);
 }
 export default app;
