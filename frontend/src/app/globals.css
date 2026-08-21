@@ -4,12 +4,12 @@
 
 :root {
   --color-primary: #FFFFFF;
-  --color-secondary: #0A1628;
-  --color-accent: #00D4FF;
-  --color-background: #0A1628;
-  --color-text: #FFFFFF;
+  --color-secondary: #06111F;
+  --color-accent: #22D3EE;
+  --color-background: #06111F;
+  --color-text: #F8FAFC;
   --font-family: 'Inter', sans-serif;
-  --border-radius: 12px;
+  --border-radius: 14px;
   --glass-intensity: 50;
 }
 
@@ -21,6 +21,11 @@
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: var(--border-radius);
   }
+
+  .travel-depth {
+    transform-style: preserve-3d;
+    perspective: 1200px;
+  }
 }
 
 body {
@@ -29,7 +34,6 @@ body {
   font-family: var(--font-family);
 }
 
-/* Light Mode Override */
 html.light-mode {
   --color-primary: #0A1628;
   --color-secondary: #FFFFFF;
@@ -48,4 +52,10 @@ html.light-mode .glass {
   background: rgba(255, 255, 255, 0.7);
   border: 1px solid rgba(10, 22, 40, 0.1);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+  }
 }
