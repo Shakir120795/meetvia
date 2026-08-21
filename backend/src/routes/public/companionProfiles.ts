@@ -9,7 +9,7 @@ router.get('/:id', async (req, res, next) => {
       where: { id: req.params.id, status: 'ACTIVE', roles: { some: { role: { name: 'COMPANION' } } } },
       include: {
         profile: true,
-        experiences: { where: { status: 'PUBLISHED' }, orderBy: { createdAt: 'desc' } },
+        experiences: { where: { status: 'PUBLISHED' }, orderBy: { createdAt: 'desc' }, include: { city: true } },
         availability: { where: { isActive: true }, orderBy: { weekday: 'asc' } },
       },
     });
@@ -22,8 +22,9 @@ router.get('/', async (_req, res, next) => {
   try {
     const companions = await prisma.user.findMany({
       where: { status: 'ACTIVE', roles: { some: { role: { name: 'COMPANION' } } } },
-      include: { profile: true, experiences: { where: { status: 'PUBLISHED' }, take: 3 } },
+      include: { profile: true, experiences: { where: { status: 'PUBLISHED' }, take: 3, include: { city: true } } },
       orderBy: { createdAt: 'desc' },
+      take: 12,
     });
     res.json({ success: true, data: companions.map((companion) => ({ id: companion.id, profile: companion.profile, experiences: companion.experiences })) });
   } catch (error) { next(error); }
