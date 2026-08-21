@@ -8,10 +8,12 @@ import CitiesSection from '@/components/home/CitiesSection';
 import FAQPreview from '@/components/home/FAQPreview';
 import TestimonialsPreview from '@/components/home/TestimonialsPreview';
 import ContactSection from '@/components/home/ContactSection';
+import AboutSection from '@/components/home/AboutSection';
 import { IHeroSlide, IHowItWorksStep, IService, ICity, IFAQ, ITestimonial, ISiteSettings } from '@/types';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 interface ApiSuccessResponse<T> { success: boolean; data: T; }
+interface IAboutPage { title: string; content: string; }
 async function fetchData<T>(path: string): Promise<T | null> {
   try { const res = await fetch(`${API_BASE}${path}`, { cache: 'no-store' }); if (!res.ok) return null; const json: ApiSuccessResponse<T> = await res.json(); return json.success ? json.data : null; }
   catch { return null; }
@@ -26,7 +28,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function Home() {
-  const [slides, steps, services, cities, faqs, testimonials, siteSettings] = await Promise.all([
+  const [slides, steps, services, cities, faqs, testimonials, siteSettings, aboutPage] = await Promise.all([
     fetchData<IHeroSlide[]>('/api/v1/public/hero-slides'),
     fetchData<IHowItWorksStep[]>('/api/v1/public/how-it-works'),
     fetchData<IService[]>('/api/v1/public/services/featured'),
@@ -34,6 +36,7 @@ export default async function Home() {
     fetchData<IFAQ[]>('/api/v1/public/faq/preview'),
     fetchData<ITestimonial[]>('/api/v1/public/testimonials/preview'),
     fetchData<ISiteSettings>('/api/v1/public/site-settings'),
+    fetchData<IAboutPage>('/api/v1/public/pages/about'),
   ]);
   const jsonLd = { '@context': 'https://schema.org', '@type': 'Organization', name: 'GoWith', description: 'Travel companions and local experiences.' };
   return (
@@ -41,7 +44,8 @@ export default async function Home() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <HeroSection slides={slides || []} />
       <HowItWorks steps={steps || []} /><SafetySection /><ServicesPreview services={services || []} />
-      <BecomeCompanion /><CitiesSection cities={cities || []} /><FAQPreview faqs={faqs || []} />
+      <BecomeCompanion /><AboutSection title={aboutPage?.title} content={aboutPage?.content} />
+      <CitiesSection cities={cities || []} /><FAQPreview faqs={faqs || []} />
       <TestimonialsPreview testimonials={testimonials || []} />
       <ContactSection siteSettings={siteSettings || { _id: '', siteName: 'GoWith', metaTitle: 'GoWith', createdAt: '', updatedAt: '' }} />
     </main>
