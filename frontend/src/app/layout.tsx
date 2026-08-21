@@ -6,38 +6,20 @@ import { AuthProvider } from '@/context/AuthContext';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 
-const inter = Inter({
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-inter',
-});
+const inter = Inter({ subsets: ['latin'], display: 'swap', variable: '--font-inter' });
 
 export const metadata: Metadata = {
-  title: 'Meetvia',
-  description:
-    'Professional public companionship and visitor assistance services in India. Structured, safe, public-only city assistance for domestic and international visitors.',
+  title: 'GoWith — Find someone to go with.',
+  description: 'Find trusted local companions for travel, city exploration and experiences.',
   openGraph: {
-    title: 'Meetvia',
-    description:
-      'Professional public companionship and visitor assistance services in India.',
+    title: 'GoWith — Find someone to go with.',
+    description: 'Travel better with a trusted companion by your side.',
     type: 'website',
-    siteName: 'Meetvia',
-    images: [
-      {
-        url: 'https://meetvia.com/og-image.png',
-        width: 1200,
-        height: 630,
-        alt: 'Meetvia - Professional Public Companionship Services',
-      },
-    ],
+    siteName: 'GoWith',
   },
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={inter.variable}>
       <body className={`${inter.className} flex flex-col min-h-screen`}>
