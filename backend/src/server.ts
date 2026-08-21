@@ -24,6 +24,7 @@ import publicCompanionAvailabilityRoutes from './routes/public/companionAvailabi
 import publicBookingsRoutes from './routes/public/bookings';
 import publicPaymentsRoutes from './routes/public/payments';
 import publicCompanionProfilesRoutes from './routes/public/companionProfiles';
+import publicTripsRoutes from './routes/public/trips';
 import adminAuthRoutes from './routes/admin/auth';
 import adminDashboardRoutes from './routes/admin/dashboard';
 import adminInquiriesRoutes from './routes/admin/inquiries';
@@ -57,6 +58,7 @@ app.use('/api/v1/public/companion-availability', publicCompanionAvailabilityRout
 app.use('/api/v1/public/bookings', publicBookingsRoutes);
 app.use('/api/v1/public/payments', publicPaymentsRoutes);
 app.use('/api/v1/public/companions', publicCompanionProfilesRoutes);
+app.use('/api/v1/public/trips', publicTripsRoutes);
 app.use('/api/v1/public/faq', publicFaqRoutes);
 app.use('/api/v1/public/testimonials', publicTestimonialsRoutes);
 app.use('/api/v1/public/pages', publicPagesRoutes);
