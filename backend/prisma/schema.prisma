@@ -1,4 +1,4 @@
-// Prisma schema for Meetvia platform
+// Prisma schema for Meetvia → GoWith platform
 // PostgreSQL database
 
 generator client {
@@ -9,8 +9,6 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
-
-// ─── Enums ───────────────────────────────────────────────────────────────────
 
 enum ThemePreset {
   futuristic_blue @map("futuristic-blue")
@@ -50,7 +48,17 @@ enum ApplicationStatus {
   rejected
 }
 
-// ─── Models ──────────────────────────────────────────────────────────────────
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+  DEACTIVATED
+}
+
+enum UserRole {
+  CUSTOMER
+  COMPANION
+  ADMIN
+}
 
 model AdminUser {
   id        String   @id @default(cuid())
@@ -61,6 +69,115 @@ model AdminUser {
   updatedAt DateTime @updatedAt
 
   @@map("admin_users")
+}
+
+model User {
+  id              String        @id @default(cuid())
+  email           String?       @unique
+  mobile          String?       @unique
+  status          UserStatus    @default(ACTIVE)
+  emailVerifiedAt DateTime?
+  mobileVerifiedAt DateTime?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  profile         UserProfile?
+  socialAccounts  SocialAccount[]
+  sessions        Session[]
+  otpRequests     OtpRequest[]
+  roles           UserRoleAssignment[]
+
+  @@index([status])
+  @@map("users")
+}
+
+model UserProfile {
+  id                String   @id @default(cuid())
+  userId            String   @unique
+  firstName         String?
+  lastName          String?
+  displayName       String?
+  avatarUrl         String?
+  bio               String?
+  countryCode       String?
+  preferredLanguage  String?
+  preferredCurrency  String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_profiles")
+}
+
+model Role {
+  id          String              @id @default(cuid())
+  name        UserRole            @unique
+  description String?
+  assignments UserRoleAssignment[]
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+
+  @@map("roles")
+}
+
+model UserRoleAssignment {
+  id        String   @id @default(cuid())
+  userId    String
+  roleId    String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role      Role     @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, roleId])
+  @@index([roleId])
+  @@map("user_role_assignments")
+}
+
+model SocialAccount {
+  id             String   @id @default(cuid())
+  userId         String
+  provider       String
+  providerUserId String
+  email          String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerUserId])
+  @@index([userId])
+  @@map("social_accounts")
+}
+
+model Session {
+  id          String   @id @default(cuid())
+  userId      String
+  tokenHash   String   @unique
+  expiresAt   DateTime
+  revokedAt   DateTime?
+  createdAt   DateTime @default(now())
+  lastSeenAt  DateTime?
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, expiresAt])
+  @@map("sessions")
+}
+
+model OtpRequest {
+  id          String   @id @default(cuid())
+  userId      String?
+  mobile      String?
+  email       String?
+  purpose     String
+  codeHash    String
+  expiresAt   DateTime
+  consumedAt  DateTime?
+  attempts    Int      @default(0)
+  createdAt   DateTime @default(now())
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([mobile, purpose, createdAt])
+  @@index([email, purpose, createdAt])
+  @@index([expiresAt])
+  @@map("otp_requests")
 }
 
 model SiteSettings {
@@ -185,7 +302,7 @@ model City {
   state        String
   country      String
   status       CityStatus @default(active)
-  displayOrder Int        @default(0)
+  displayOrder Int         @default(0)
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
 
