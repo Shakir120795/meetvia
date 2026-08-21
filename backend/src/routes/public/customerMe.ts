@@ -4,6 +4,15 @@ import { CustomerAuthRequest, requireCustomerAuth } from '../../middleware/custo
 
 const router = Router();
 
+const optionalString = (value: unknown, maxLength: number) => {
+  if (value === undefined) return undefined;
+  if (value === null) return null;
+  if (typeof value !== 'string') throw new Error('INVALID_PROFILE_FIELD');
+  const trimmed = value.trim();
+  if (trimmed.length > maxLength) throw new Error('PROFILE_FIELD_TOO_LONG');
+  return trimmed || null;
+};
+
 router.get('/', requireCustomerAuth, async (req: CustomerAuthRequest, res, next) => {
   try {
     const user = await prisma.user.findUnique({
@@ -25,6 +34,39 @@ router.get('/', requireCustomerAuth, async (req: CustomerAuthRequest, res, next)
       },
     });
   } catch (error) {
+    next(error);
+  }
+});
+
+router.patch('/', requireCustomerAuth, async (req: CustomerAuthRequest, res, next) => {
+  try {
+    const body = req.body || {};
+    const allowed = ['firstName', 'lastName', 'displayName', 'avatarUrl', 'bio', 'countryCode', 'preferredLanguage', 'preferredCurrency'];
+    const unknown = Object.keys(body).filter((key) => !allowed.includes(key));
+    if (unknown.length) return res.status(400).json({ success: false, error: { code: 'INVALID_PROFILE_FIELDS', fields: unknown } });
+
+    const profileData = {
+      firstName: optionalString(body.firstName, 80),
+      lastName: optionalString(body.lastName, 80),
+      displayName: optionalString(body.displayName, 120),
+      avatarUrl: optionalString(body.avatarUrl, 500),
+      bio: optionalString(body.bio, 500),
+      countryCode: optionalString(body.countryCode, 8),
+      preferredLanguage: optionalString(body.preferredLanguage, 16),
+      preferredCurrency: optionalString(body.preferredCurrency, 8),
+    };
+
+    const existing = await prisma.userProfile.findUnique({ where: { userId: req.customer!.id } });
+    const profile = existing
+      ? await prisma.userProfile.update({ where: { userId: req.customer!.id }, data: profileData })
+      : await prisma.userProfile.create({ where: undefined as never, data: { userId: req.customer!.id, ...profileData } });
+
+    return res.json({ success: true, data: { profile } });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unable to update profile';
+    if (message === 'INVALID_PROFILE_FIELD' || message === 'PROFILE_FIELD_TOO_LONG') {
+      return res.status(400).json({ success: false, error: { code: message } });
+    }
     next(error);
   }
 });
