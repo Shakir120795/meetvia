@@ -4,6 +4,8 @@ import prisma from '../config/db';
 const OTP_TTL_MS = 5 * 60 * 1000;
 const SESSION_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 const MAX_OTP_ATTEMPTS = 5;
+const OTP_REQUEST_COOLDOWN_MS = 60 * 1000;
+const MAX_OTP_REQUESTS_PER_HOUR = 5;
 
 export type OtpChannel = 'mobile' | 'email';
 
@@ -15,6 +17,12 @@ function normalizeIdentifier(channel: OtpChannel, value: string) {
   return channel === 'email' ? value.trim().toLowerCase() : value.replace(/\D/g, '');
 }
 
+function safeEqualHex(left: string, right: string) {
+  const leftBuffer = Buffer.from(left, 'hex');
+  const rightBuffer = Buffer.from(right, 'hex');
+  return leftBuffer.length === rightBuffer.length && crypto.timingSafeEqual(leftBuffer, rightBuffer);
+}
+
 export function generateOtp() {
   return crypto.randomInt(100000, 1000000).toString();
 }
@@ -22,8 +30,28 @@ export function generateOtp() {
 export async function requestCustomerOtp(channel: OtpChannel, rawIdentifier: string, purpose = 'login') {
   const identifier = normalizeIdentifier(channel, rawIdentifier);
   const now = new Date();
-  const code = generateOtp();
+  const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
+  const cooldownCutoff = new Date(now.getTime() - OTP_REQUEST_COOLDOWN_MS);
 
+  const recentRequests = await prisma.otpRequest.findMany({
+    where: {
+      purpose,
+      createdAt: { gte: oneHourAgo },
+      ...(channel === 'email' ? { email: identifier } : { mobile: identifier }),
+    },
+    orderBy: { createdAt: 'desc' },
+    take: MAX_OTP_REQUESTS_PER_HOUR,
+    select: { createdAt: true },
+  });
+
+  if (recentRequests.length >= MAX_OTP_REQUESTS_PER_HOUR) {
+    throw new Error('OTP_RATE_LIMITED');
+  }
+  if (recentRequests[0] && recentRequests[0].createdAt >= cooldownCutoff) {
+    throw new Error('OTP_COOLDOWN');
+  }
+
+  const code = generateOtp();
   const user = await prisma.user.findFirst({
     where: channel === 'email' ? { email: identifier } : { mobile: identifier },
   });
@@ -42,10 +70,7 @@ export async function requestCustomerOtp(channel: OtpChannel, rawIdentifier: str
   return { requestId: otp.id, code, expiresAt: otp.expiresAt };
 }
 
-export async function verifyCustomerOtp(
-  requestId: string,
-  rawCode: string,
-) {
+export async function verifyCustomerOtp(requestId: string, rawCode: string) {
   const otp = await prisma.otpRequest.findUnique({ where: { id: requestId } });
   if (!otp || otp.consumedAt || otp.expiresAt <= new Date()) {
     throw new Error('OTP_EXPIRED_OR_INVALID');
@@ -54,7 +79,7 @@ export async function verifyCustomerOtp(
     throw new Error('OTP_ATTEMPTS_EXCEEDED');
   }
 
-  const valid = hash(rawCode.trim()) === otp.codeHash;
+  const valid = safeEqualHex(hash(rawCode.trim()), otp.codeHash);
   if (!valid) {
     await prisma.otpRequest.update({
       where: { id: requestId },
