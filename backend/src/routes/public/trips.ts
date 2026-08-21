@@ -8,6 +8,7 @@ const createSchema = Joi.object({
   title: Joi.string().trim().min(2).max(120).required(),
   destination: Joi.string().trim().min(2).max(160).required(),
   countryCode: Joi.string().trim().uppercase().length(2).required(),
+  travelType: Joi.string().valid('DOMESTIC', 'INTERNATIONAL').required(),
   startAt: Joi.date().iso().required(),
   endAt: Joi.date().iso().greater(Joi.ref('startAt')).required(),
   budgetMinor: Joi.number().integer().min(0).allow(null),
@@ -22,14 +23,33 @@ router.post('/', requireCustomerAuth, async (req: CustomerAuthRequest, res, next
   try {
     const { error, value } = createSchema.validate(req.body, { abortEarly: false, stripUnknown: true });
     if (error) return res.status(400).json({ success: false, error: { code: 'VALIDATION_ERROR', details: error.details.map((d) => d.message) } });
-    const trip = await prisma.trip.create({ data: { ownerId: req.customer!.id, title: value.title, destination: value.destination, countryCode: value.countryCode, startAt: new Date(value.startAt), endAt: new Date(value.endAt), budgetMinor: value.budgetMinor ?? undefined, currency: value.currency, travelStyle: value.travelStyle || undefined, interests: value.interests, languages: value.languages, notes: value.notes || undefined, members: { create: { userId: req.customer!.id, role: 'OWNER' } } }, include: { members: true } });
+
+    if (value.travelType === 'DOMESTIC') {
+      const profile = await prisma.userProfile.findUnique({ where: { userId: req.customer!.id }, select: { countryCode: true } });
+      if (!profile?.countryCode || profile.countryCode.toUpperCase() !== value.countryCode) {
+        return res.status(400).json({ success: false, error: { code: 'DOMESTIC_COUNTRY_MISMATCH', message: 'Domestic trips must stay within the traveller country.' } });
+      }
+    }
+
+    const trip = await prisma.trip.create({ data: { ownerId: req.customer!.id, title: value.title, destination: value.destination, countryCode: value.countryCode, travelType: value.travelType, startAt: new Date(value.startAt), endAt: new Date(value.endAt), budgetMinor: value.budgetMinor ?? undefined, currency: value.currency, travelStyle: value.travelStyle || undefined, interests: value.interests, languages: value.languages, notes: value.notes || undefined, members: { create: { userId: req.customer!.id, role: 'OWNER' } } }, include: { members: true } });
     res.status(201).json({ success: true, data: trip });
   } catch (error) { next(error); }
 });
 
 router.get('/', requireCustomerAuth, async (req: CustomerAuthRequest, res, next) => {
   try {
-    const trips = await prisma.trip.findMany({ where: { members: { some: { userId: req.customer!.id } } }, include: { members: { include: { user: { include: { profile: true } } } } }, orderBy: { startAt: 'asc' } });
+    const type = typeof req.query.travelType === 'string' ? req.query.travelType.toUpperCase() : undefined;
+    if (type && !['DOMESTIC', 'INTERNATIONAL'].includes(type)) return res.status(400).json({ success: false, error: { code: 'INVALID_TRAVEL_TYPE' } });
+    const trips = await prisma.trip.findMany({ where: { members: { some: { userId: req.customer!.id } }, ...(type ? { travelType: type as 'DOMESTIC' | 'INTERNATIONAL' } : {}) }, include: { members: { include: { user: { include: { profile: true } } } } }, orderBy: { startAt: 'asc' } });
+    res.json({ success: true, data: trips });
+  } catch (error) { next(error); }
+});
+
+router.get('/domestic', requireCustomerAuth, async (req: CustomerAuthRequest, res, next) => {
+  try {
+    const profile = await prisma.userProfile.findUnique({ where: { userId: req.customer!.id }, select: { countryCode: true } });
+    if (!profile?.countryCode) return res.status(400).json({ success: false, error: { code: 'COUNTRY_REQUIRED' } });
+    const trips = await prisma.trip.findMany({ where: { travelType: 'DOMESTIC', countryCode: profile.countryCode.toUpperCase(), members: { some: { userId: req.customer!.id } } }, include: { members: { include: { user: { include: { profile: true } } } } }, orderBy: { startAt: 'asc' } });
     res.json({ success: true, data: trips });
   } catch (error) { next(error); }
 });
