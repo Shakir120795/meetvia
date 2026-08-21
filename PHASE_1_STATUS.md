@@ -1,34 +1,43 @@
 # Phase 1 — Core Foundation
 
-Status: COMPLETE
+Status: IN PROGRESS — full-stack rebuild pass
 
-## Completed
+## Full-stack rule
 
-- GoWith branding/UI direction
-- Travel + companion visual direction
-- 3D-style hero treatment
-- Existing Meetvia CMS hero behavior preserved
-- User identity foundation
-- Role assignment foundation
-- User profile foundation
-- Social account foundation
-- Session foundation
-- OTP request storage
-- OTP verification
-- OTP expiry and attempt limits
-- Customer session creation/revocation
-- Authenticated customer middleware
-- Authenticated customer profile endpoint
-- Strict email/mobile validation
-- Strict OTP validation
-- Bearer-token validation
-- Structured auth validation errors
-- Customer auth validation tests
+Phase 1 is only complete when each requirement is implemented and integrated across the applicable frontend, backend/API, database, and admin panel, then verified with typecheck/build/tests. Existing CMS/admin functionality must remain intact.
 
-## Safety rule
+## Completed in this full-stack pass
 
-Existing CMS/admin functionality remains additive and is not replaced by the new customer identity layer.
+### Customer authentication
+- Customer OTP login UI at `/login`
+- Email/mobile channel selection
+- Strict client-side email/mobile validation
+- OTP request flow connected to `/api/v1/public/auth/otp/request`
+- OTP verification flow connected to `/api/v1/public/auth/otp/verify`
+- Customer session storage
+- Customer session API client
+- Customer auth context
+- Customer profile page
+- Customer logout flow
+- GoWith branding on public navbar
+- Public sign-in/profile entry point
 
-## Verification
+### Admin
+- Customer user management API
+- Admin customer list
+- Customer account status management
+- Active / suspended / deactivated states
 
-Backend test coverage added for the new validation layer. Run `npm test` and `npm run build` from `backend/` after pulling the branch to perform the environment-specific final verification.
+## Existing foundation retained
+
+The branch already contains the backend customer identity foundation: User, UserProfile, Role, UserRoleAssignment, SocialAccount, Session and OtpRequest Prisma models; OTP request/verification routes; customer session middleware; and customer profile API.
+
+## Still pending before Phase 1 can be marked COMPLETE
+
+- Full verification of all Phase 1 backend flows against the live database
+- Full customer profile editing UI/API integration where specified
+- Social account integration UI/API where specified
+- Final branding/3D hero audit against the GoWith UI direction
+- Admin integration/navigation polish for customer management
+- Frontend + backend typecheck/build/test verification
+- End-to-end manual verification of OTP, session, profile and admin user flows
