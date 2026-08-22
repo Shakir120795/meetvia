@@ -9,7 +9,7 @@
 | Phase | Specification | Current status | Notes |
 |---|---|---|---|
 | 0 | Documentation & Repository | 🟡 Foundation exists | Repo, environments, Prisma/PostgreSQL, docs and deployment foundation exist; full acceptance/CI verification remains. |
-| 1 | Website Foundation | 🟡 IN PROGRESS | Public homepage sections, live companion preview integration and branding exist; full acceptance and end-to-end verification remain. |
+| 1 | Website Foundation | 🟡 IN PROGRESS | Public homepage, live companion preview, companion browse/search and profile detail foundation exist; full acceptance and end-to-end verification remain. |
 | 2 | Authentication | 🟡 Foundation exists | User/session/OTP/role schema and auth foundation exist; all provider flows and full verification remain. |
 | 3 | Companion Marketplace | ❌ Not complete | Schema/foundation exists; onboarding, real profiles, search, filters, availability, pricing and full UI/API/admin flows remain. |
 | 4 | Companion Verification | ❌ Not complete | Verification schema/foundation is not sufficient; complete workflow, documents, admin review and suspension remain. |
@@ -36,8 +36,11 @@
 - Safety section
 - Services preview
 - Become a Companion section
-- Companion preview now reads live active companion profiles from PostgreSQL via `/api/v1/public/companions`
-- Companion API includes published experience/city context for the preview
+- Companion preview reads live active companion profiles from PostgreSQL via `/api/v1/public/companions`
+- Companion API includes published experience/city context
+- Companion API supports keyword search, city filtering and pagination
+- `/companions` marketplace page with search, city filter, loading, empty and error states
+- `/companions/[id]` live companion profile page with experiences and availability
 - Companion empty state instead of fake hardcoded profiles
 - About section
 - Cities section
@@ -51,8 +54,8 @@
 ### Still required before Phase 1 can be called COMPLETE
 - verify every Phase 1 acceptance item against the actual running VPS
 - confirm futuristic intro and hero behavior on desktop/mobile
-- confirm Browse Companions/search controls required by the source spec
-- confirm all homepage CTA/navigation links, including `/companions`
+- confirm Browse Companions/search controls required by the source spec against the running site
+- confirm all homepage CTA/navigation links, including `/companions` and companion profile links
 - verify Contact end-to-end: frontend → API → DB → admin
 - verify CMS-controlled content and empty/error states
 - verify responsive behavior
