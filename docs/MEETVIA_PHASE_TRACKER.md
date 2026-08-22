@@ -54,6 +54,7 @@
 - Contact Inquiry admin API with authentication, filtering, search, status update and admin notes
 - Contact Inquiry admin frontend list/detail/status/notes actions
 - Contact Inquiry frontend/admin identifier contract aligned to Prisma `id`
+- Contact API automated coverage includes validation, persistence, database failure handling and Telegram notification failure isolation
 - Customer OTP request/verify/logout backend foundation and automated coverage
 - Customer auth context/session integration in frontend
 - Footer and social links
@@ -65,7 +66,6 @@
 - complete all required homepage CTA/navigation behavior in code
 - complete CMS-controlled content for every Phase 1 section that the source specification requires to be admin-managed
 - ensure CMS API contracts use Prisma `id` consistently across all implemented admin sections
-- complete Contact end-to-end automated/code-level acceptance including notification failure behavior
 - complete CMS empty/error/loading handling where required
 - complete responsive behavior requirements in code
 - run repository production build/typecheck/lint checks where configured
