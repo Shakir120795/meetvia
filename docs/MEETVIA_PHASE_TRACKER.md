@@ -8,70 +8,62 @@
 
 | Phase | Specification | Current status | Notes |
 |---|---|---|---|
-| 0 | Documentation & Repository | 🟡 Foundation exists | Repo, environments, Prisma/PostgreSQL and docs foundation exist; final QA remains. |
-| 1 | Website Foundation | 🟡 IN PROGRESS | Public homepage, live companion preview, companion browse/search/profile, Contact Inquiry and Hero CMS full-stack foundations exist; remaining acceptance work is tracked below. |
-| 2 | Authentication | 🟡 Foundation exists | User/session/OTP/role schema and auth foundation exist; all provider flows remain. |
-| 3 | Companion Marketplace | ❌ Not complete | Schema/foundation exists; onboarding, real profiles, search, filters, availability, pricing and full UI/API/admin flows remain. |
-| 4 | Companion Verification | ❌ Not complete | Verification schema/foundation is not sufficient; complete workflow, documents, admin review and suspension remain. |
-| 5 | Experience Marketplace | ❌ Not complete | Experience model exists; categories, discovery, filters, admin management and complete UI/API remain. |
-| 6 | Booking Engine | ❌ Not complete | Booking models exist; real booking state machine, availability, cancellation, history and notifications remain. |
-| 7 | Payments | ❌ Not complete | Payment model exists; provider integration, intents, webhook authority, refunds and admin view remain. |
-| 8 | Chat | ❌ Not complete | No complete booking-controlled WebSocket chat, attachments, reports/block/history flow verified. |
-| 9 | Safety / Moderation | ❌ Not complete | Detection, OCR, moderation, enforcement, reports and audit workflows remain. |
-| 10 | Admin Control | 🟡 Foundation exists | Admin backend/schema/CMS foundation exists; full operational dashboard and all control sections remain. |
-| 11 | Safety, Reliability & QA | ❌ Not complete | Automated tests, security review, monitoring, backups/restore and performance testing remain. |
-| 12 | Production Launch | ⏳ Later | Final VPS/domain/HTTPS/Nginx/monitoring/backups deployment happens after the full project build. |
+| 0 | Documentation & Repository | 🟡 Foundation exists | Repo, environments, Prisma/PostgreSQL and MeetVia docs foundation exist; documentation path cleanup and final QA remain. |
+| 1 | Website Foundation | 🟡 IMPLEMENTATION COMPLETE / VERIFICATION PENDING | Full-stack acceptance pass implemented. Final automated CI/build/test verification is still required before the phase gate can be closed. |
+| 2 | Authentication | 🟡 Foundation exists | User/session/OTP/role schema and auth foundation exist; Phase 2 remains locked until Phase 1 acceptance closes. |
+| 3 | Companion Marketplace | ❌ Not complete | Schema/foundation exists; later marketplace requirements remain. |
+| 4 | Companion Verification | ❌ Not complete | Verification workflow remains. |
+| 5 | Experience Marketplace | ❌ Not complete | Experience model/foundation exists; complete marketplace remains. |
+| 6 | Booking Engine | ❌ Not complete | Booking state machine, availability and notifications remain. |
+| 7 | Payments | ❌ Not complete | Provider integration, webhook authority, refunds and admin view remain. |
+| 8 | Chat | ❌ Not complete | Booking-controlled realtime chat remains. |
+| 9 | Safety / Moderation | ❌ Not complete | Detection, moderation, reports and enforcement remain. |
+| 10 | Admin Control | 🟡 Foundation exists | Full operational admin remains a later phase. |
+| 11 | Safety, Reliability & QA | ❌ Not complete | Full project QA remains after feature phases. |
+| 12 | Production Launch | ⏳ Later | Final VPS/domain/HTTPS/deployment happens after the full project build. |
 | 13 | Post-Launch Stabilization | ⏳ Future | Starts after production launch. |
 | 14 | Future Features | ⏳ Future | AI, referrals, subscriptions, wallet, dynamic pricing, advanced analytics, etc. |
 
-## Phase 1 detailed checkpoint
+## Phase 1 acceptance pass
 
-### Implemented foundation
-- MeetVia navbar and branding
-- responsive/mobile navigation
-- theme toggle
-- futuristic hero with animated orbit/depth treatment
-- Hero public API reads visible slides from PostgreSQL
-- Hero Admin CMS reads/writes PostgreSQL hero slides with authentication
-- Hero Admin CMS supports create, edit, visibility, delete and reorder
-- Hero Admin CMS ID contract aligned to Prisma `id`
-- How It Works section with CMS empty-state handling
-- Safety section
-- Services preview with CMS empty-state handling
-- Become a Companion section
-- Companion preview reads live active companion profiles from PostgreSQL via `/api/v1/public/companions`
-- Companion API includes published experience/city context
-- Companion API supports keyword search, city filtering and pagination
-- `/companions` marketplace page with search, city filter, loading, empty and error states
-- `/companions/[id]` live companion profile page with experiences and availability
-- Companion empty state instead of fake hardcoded profiles
-- About section
-- Cities section
-- FAQ preview with CMS empty-state handling
-- Testimonials preview
-- Contact section with MeetVia branding
-- Contact Inquiry backend → PostgreSQL persistence
-- Contact Inquiry admin API with authentication, filtering, search, status update and admin notes
-- Contact Inquiry admin frontend list/detail/status/notes actions
-- Contact Inquiry frontend/admin identifier contract aligned to Prisma `id`
-- Contact API automated coverage includes validation, persistence, database failure handling and Telegram notification failure isolation
-- Customer OTP request/verify/logout backend foundation and automated coverage
-- Customer auth context/session integration in frontend
-- Footer and social links
-- Terms, Privacy, Refund and Safety pages
-- PostgreSQL/Prisma-backed public CMS foundation
+### Public website / frontend
+- MeetVia navbar, responsive mobile navigation and theme toggle retained.
+- Futuristic hero retains animated orbit/depth treatment and visible CMS slides.
+- Hero now provides city, experience, date and time discovery controls and routes the complete selection to `/companions`.
+- Companion marketplace consumes the discovery parameters and exposes matching city/experience/availability filters.
+- Companion preview cards now link directly to live companion profiles.
+- How It Works, Safety, Services, Become a Companion, About, Cities, FAQ, Testimonials and Contact sections remain integrated with loading/empty/error behavior where applicable.
+- Services now use canonical Prisma `id` values and render their CMS-defined CTA text/link.
+- Contact form now uses CMS service options and CMS safety acknowledgement text, validates inline, preserves values on failure, shows a clear success state and provides the WhatsApp continuation CTA.
+- Companion application and public social/footer/FAQ/testimonial consumers use canonical `id` identifiers.
+- Legacy GoWith utility-class branding was removed from the public visual layer.
 
-### Still required before Phase 1 can be called COMPLETE
-- compare every Phase 1 acceptance item against the source specification
-- complete all required homepage CTA/navigation behavior in code
-- complete CMS-controlled content for every Phase 1 section that the source specification requires to be admin-managed
-- ensure CMS API contracts use Prisma `id` consistently across all implemented admin sections
-- complete CMS empty/error/loading handling where required
-- complete responsive behavior requirements in code
-- run repository production build/typecheck/lint checks where configured
-- add/fix automated API/UI tests for remaining Phase 1 requirements
-- document and resolve all acceptance failures
+### Backend / API / PostgreSQL
+- Prisma/PostgreSQL remains authoritative for CMS and companion data.
+- Public companion search now supports `q`, city, experience/category, date and time availability filters.
+- Date/time discovery maps to the companion availability weekday/time window.
+- Existing contact inquiry persistence and Telegram notification isolation remain intact.
+- Existing admin CMS controllers continue to use canonical Prisma `id` contracts.
+
+### Admin / CMS
+- Hero CMS supports create/edit/visibility/delete/reorder using Prisma `id`.
+- FAQ, Services, Cities and Testimonials admin identifier contracts are aligned to Prisma `id`.
+- Site settings remain the source for contact/WhatsApp/safety acknowledgement content.
+- CMS-backed public sections retain their empty/error/loading handling.
+
+### Automated acceptance added
+- Companion discovery API filter tests added.
+- Phase 1 GitHub Actions workflow added for backend Prisma generation + typecheck/build/tests and frontend lint/build.
+
+## Remaining Phase 1 gate
+
+The implementation pass above is complete, but Phase 1 **MUST NOT** be marked COMPLETE until the repository verification gate passes:
+
+- GitHub Actions backend job passes.
+- GitHub Actions frontend job passes.
+- No remaining Phase 1 acceptance failures.
+- Final manual/browser verification is performed by the developer on the local build.
 
 ## Phase advancement gate
 
-Do not start Phase 2 implementation until every Phase 1 item above is implemented full-stack and marked complete.
+Do not start Phase 2 implementation until the Phase 1 verification gate above passes.
