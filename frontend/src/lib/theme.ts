@@ -1,10 +1,7 @@
 import { IThemeSettings } from '@/types';
 
-/**
- * Default Futuristic Blue theme values — used as fallback when
- * the theme API is unavailable or returns an error.
- */
-export const DEFAULT_THEME: Omit<IThemeSettings, '_id' | 'createdAt' | 'updatedAt'> = {
+/** Default Futuristic Blue theme values used when the theme API is unavailable. */
+export const DEFAULT_THEME: Omit<IThemeSettings, 'id' | 'createdAt' | 'updatedAt'> = {
   activePreset: 'futuristic-blue',
   primaryColor: '#FFFFFF',
   secondaryColor: '#0A1628',
@@ -16,12 +13,8 @@ export const DEFAULT_THEME: Omit<IThemeSettings, '_id' | 'createdAt' | 'updatedA
   glassmorphismIntensity: 50,
 };
 
-/**
- * Apply theme values as CSS custom properties on the document root element.
- */
 export function applyTheme(theme: Pick<IThemeSettings, 'primaryColor' | 'secondaryColor' | 'accentColor' | 'backgroundColor' | 'textColor' | 'fontFamily' | 'borderRadius' | 'glassmorphismIntensity'>): void {
   if (typeof document === 'undefined') return;
-
   const root = document.documentElement;
   root.style.setProperty('--color-primary', theme.primaryColor);
   root.style.setProperty('--color-secondary', theme.secondaryColor);
