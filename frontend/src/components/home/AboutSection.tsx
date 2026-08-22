@@ -8,8 +8,8 @@ interface AboutSectionProps {
 }
 
 export default function AboutSection({ title, content }: AboutSectionProps) {
-  const heading = title || 'About GoWith';
-  const body = content || 'GoWith helps people find trusted companions for travel, city exploration and shared experiences. Our goal is to make going somewhere feel more connected, comfortable and enjoyable.';
+  const heading = title || 'About MeetVia';
+  const body = content || 'MeetVia helps people find trusted companions for travel, city exploration and shared experiences. Our goal is to make going somewhere feel more connected, comfortable and enjoyable.';
 
   return (
     <section id="about" className="py-20 px-4 sm:px-6 lg:px-8">
