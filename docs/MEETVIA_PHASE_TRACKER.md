@@ -2,15 +2,15 @@
 
 **Branch:** `migration-stage-0`
 
-**Rule:** A phase is COMPLETE only after frontend + backend/API + database + admin (where applicable) + integration + verification/acceptance are complete.
+**Rule:** A phase is COMPLETE only after frontend + backend/API + database + admin (where applicable) + integration + code-level acceptance are complete. Final VPS deployment happens after the full project build and is not a prerequisite for continuing implementation.
 
 ## Current status
 
 | Phase | Specification | Current status | Notes |
 |---|---|---|---|
-| 0 | Documentation & Repository | 🟡 Foundation exists | Repo, environments, Prisma/PostgreSQL, docs and deployment foundation exist; full acceptance/CI verification remains. |
-| 1 | Website Foundation | 🟡 IN PROGRESS | Public homepage, live companion preview, companion browse/search and profile detail foundation exist; full acceptance and end-to-end verification remain. |
-| 2 | Authentication | 🟡 Foundation exists | User/session/OTP/role schema and auth foundation exist; all provider flows and full verification remain. |
+| 0 | Documentation & Repository | 🟡 Foundation exists | Repo, environments, Prisma/PostgreSQL and docs foundation exist; final QA remains. |
+| 1 | Website Foundation | 🟡 IN PROGRESS | Public homepage, live companion preview, companion browse/search/profile, Contact Inquiry and Hero CMS full-stack foundations exist; remaining acceptance work is tracked below. |
+| 2 | Authentication | 🟡 Foundation exists | User/session/OTP/role schema and auth foundation exist; all provider flows remain. |
 | 3 | Companion Marketplace | ❌ Not complete | Schema/foundation exists; onboarding, real profiles, search, filters, availability, pricing and full UI/API/admin flows remain. |
 | 4 | Companion Verification | ❌ Not complete | Verification schema/foundation is not sufficient; complete workflow, documents, admin review and suspension remain. |
 | 5 | Experience Marketplace | ❌ Not complete | Experience model exists; categories, discovery, filters, admin management and complete UI/API remain. |
@@ -20,7 +20,7 @@
 | 9 | Safety / Moderation | ❌ Not complete | Detection, OCR, moderation, enforcement, reports and audit workflows remain. |
 | 10 | Admin Control | 🟡 Foundation exists | Admin backend/schema/CMS foundation exists; full operational dashboard and all control sections remain. |
 | 11 | Safety, Reliability & QA | ❌ Not complete | Automated tests, security review, monitoring, backups/restore and performance testing remain. |
-| 12 | Production Launch | 🟡 VPS running | Frontend/backend/DB are running on VPS; production domain/HTTPS/Nginx/monitoring/backups and launch acceptance remain. |
+| 12 | Production Launch | ⏳ Later | Final VPS/domain/HTTPS/Nginx/monitoring/backups deployment happens after the full project build. |
 | 13 | Post-Launch Stabilization | ⏳ Future | Starts after production launch. |
 | 14 | Future Features | ⏳ Future | AI, referrals, subscriptions, wallet, dynamic pricing, advanced analytics, etc. |
 
@@ -31,7 +31,10 @@
 - responsive/mobile navigation
 - theme toggle
 - futuristic hero with animated orbit/depth treatment
-- Hero CMS data integration
+- Hero public API reads visible slides from PostgreSQL
+- Hero Admin CMS reads/writes PostgreSQL hero slides with authentication
+- Hero Admin CMS supports create, edit, visibility, delete and reorder
+- Hero Admin CMS ID contract aligned to Prisma `id`
 - How It Works section
 - Safety section
 - Services preview
@@ -51,24 +54,24 @@
 - Contact Inquiry admin API with authentication, filtering, search, status update and admin notes
 - Contact Inquiry admin frontend list/detail/status/notes actions
 - Contact Inquiry frontend/admin identifier contract aligned to Prisma `id`
+- Customer OTP request/verify/logout backend foundation and automated coverage
+- Customer auth context/session integration in frontend
 - Footer and social links
 - Terms, Privacy, Refund and Safety pages
 - PostgreSQL/Prisma-backed public CMS foundation
 
 ### Still required before Phase 1 can be called COMPLETE
-- verify every Phase 1 acceptance item against the actual running VPS
-- confirm futuristic intro and hero behavior on desktop/mobile
-- confirm Browse Companions/search controls required by the source spec against the running site
-- confirm all homepage CTA/navigation links, including `/companions` and companion profile links
-- verify Contact end-to-end with a real submission: frontend → API → DB → admin → status/notes update
-- verify Telegram notification behavior without blocking contact submission
-- verify CMS-controlled content and empty/error states
-- verify responsive behavior
-- run production build/typecheck/lint where configured
-- run browser/API smoke tests
-- confirm admin-side management for Phase 1 CMS data where required
+- compare every Phase 1 acceptance item against the source specification
+- complete all required homepage CTA/navigation behavior in code
+- complete CMS-controlled content for every Phase 1 section that the source specification requires to be admin-managed
+- ensure CMS API contracts use Prisma `id` consistently across all implemented admin sections
+- complete Contact end-to-end automated/code-level acceptance including notification failure behavior
+- complete CMS empty/error/loading handling where required
+- complete responsive behavior requirements in code
+- run repository production build/typecheck/lint checks where configured
+- add/fix automated API/UI tests for remaining Phase 1 requirements
 - document and resolve all acceptance failures
 
 ## Phase advancement gate
 
-Do not start Phase 2 implementation until every Phase 1 item above is verified and marked complete.
+Do not start Phase 2 implementation until every Phase 1 item above is implemented full-stack and marked complete.
