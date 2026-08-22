@@ -1,4 +1,5 @@
 import type { Config } from "tailwindcss";
+import typography from "@tailwindcss/typography";
 
 const config: Config = {
   content: [
@@ -15,15 +16,11 @@ const config: Config = {
         background: "var(--color-background)",
         foreground: "var(--color-text)",
       },
-      fontFamily: {
-        sans: ["var(--font-family)"],
-      },
-      borderRadius: {
-        theme: "var(--border-radius)",
-      },
+      fontFamily: { sans: ["var(--font-family)"] },
+      borderRadius: { theme: "var(--border-radius)" },
     },
   },
-  plugins: [require("@tailwindcss/typography")],
+  plugins: [typography],
 };
 
 export default config;
