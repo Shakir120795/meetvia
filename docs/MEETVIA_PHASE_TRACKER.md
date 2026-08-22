@@ -47,6 +47,10 @@
 - FAQ preview
 - Testimonials preview
 - Contact section with MeetVia branding
+- Contact Inquiry backend → PostgreSQL persistence
+- Contact Inquiry admin API with authentication, filtering, search, status update and admin notes
+- Contact Inquiry admin frontend list/detail/status/notes actions
+- Contact Inquiry frontend/admin identifier contract aligned to Prisma `id`
 - Footer and social links
 - Terms, Privacy, Refund and Safety pages
 - PostgreSQL/Prisma-backed public CMS foundation
@@ -56,7 +60,8 @@
 - confirm futuristic intro and hero behavior on desktop/mobile
 - confirm Browse Companions/search controls required by the source spec against the running site
 - confirm all homepage CTA/navigation links, including `/companions` and companion profile links
-- verify Contact end-to-end: frontend → API → DB → admin
+- verify Contact end-to-end with a real submission: frontend → API → DB → admin → status/notes update
+- verify Telegram notification behavior without blocking contact submission
 - verify CMS-controlled content and empty/error states
 - verify responsive behavior
 - run production build/typecheck/lint where configured
