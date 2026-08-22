@@ -6,7 +6,7 @@ import { CustomerAuthRequest, requireCustomerAuth } from '../../middleware/custo
 const router = Router();
 const createSchema = Joi.object({ tripId: Joi.string().required(), name: Joi.string().trim().min(2).max(120).required(), description: Joi.string().trim().max(1000).allow('', null), maxMembers: Joi.number().integer().min(2).max(100).default(10) });
 
-router.get('/', async (req, res, next) => {
+router.get('/', async (_req, res, next) => {
   try {
     const groups = await prisma.travelGroup.findMany({ where: { status: 'OPEN' }, include: { trip: true, creator: { include: { profile: true } }, members: { where: { status: 'ACTIVE' } } }, orderBy: { createdAt: 'desc' } });
     res.json({ success: true, data: groups });
@@ -26,19 +26,21 @@ router.post('/', requireCustomerAuth, async (req: CustomerAuthRequest, res, next
 
 router.get('/:id', async (req, res, next) => {
   try {
-    const group = await prisma.travelGroup.findUnique({ where: { id: req.params.id }, include: { trip: true, creator: { include: { profile: true } }, members: { include: { user: { include: { profile: true } } } } } });
+    const group = await prisma.travelGroup.findUnique({ where: { id: req.params.id }, include: { trip: true, creator: { include: { profile: true } } } });
     if (!group) return res.status(404).json({ success: false, error: { code: 'GROUP_NOT_FOUND' } });
-    res.json({ success: true, data: group });
+    const members = await prisma.travelGroupMember.findMany({ where: { groupId: group.id }, include: { user: { include: { profile: true } } } });
+    res.json({ success: true, data: { ...group, members } });
   } catch (error) { next(error); }
 });
 
 router.post('/:id/join', requireCustomerAuth, async (req: CustomerAuthRequest, res, next) => {
   try {
-    const group = await prisma.travelGroup.findUnique({ where: { id: req.params.id }, include: { members: { where: { status: 'ACTIVE' } } } });
+    const group = await prisma.travelGroup.findUnique({ where: { id: req.params.id } });
     if (!group) return res.status(404).json({ success: false, error: { code: 'GROUP_NOT_FOUND' } });
     if (group.status !== 'OPEN') return res.status(409).json({ success: false, error: { code: 'GROUP_NOT_OPEN' } });
-    if (group.members.some((m) => m.userId === req.customer!.id)) return res.status(409).json({ success: false, error: { code: 'ALREADY_MEMBER' } });
-    if (group.members.length >= group.maxMembers) return res.status(409).json({ success: false, error: { code: 'GROUP_FULL' } });
+    const activeMembers = await prisma.travelGroupMember.findMany({ where: { groupId: group.id, status: 'ACTIVE' } });
+    if (activeMembers.some((m) => m.userId === req.customer!.id)) return res.status(409).json({ success: false, error: { code: 'ALREADY_MEMBER' } });
+    if (activeMembers.length >= group.maxMembers) return res.status(409).json({ success: false, error: { code: 'GROUP_FULL' } });
     const member = await prisma.travelGroupMember.upsert({ where: { groupId_userId: { groupId: group.id, userId: req.customer!.id } }, create: { groupId: group.id, userId: req.customer!.id, status: 'ACTIVE', joinedAt: new Date() }, update: { status: 'ACTIVE', joinedAt: new Date() } });
     res.status(201).json({ success: true, data: member });
   } catch (error) { next(error); }
