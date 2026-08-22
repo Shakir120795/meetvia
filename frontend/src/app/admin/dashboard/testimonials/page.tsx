@@ -119,7 +119,7 @@ export default function TestimonialsPage() {
 
       if (editingTestimonial) {
         await adminPut<ApiResponse<ITestimonial>>(
-          `/api/v1/admin/testimonials/${editingTestimonial._id}`,
+          `/api/v1/admin/testimonials/${editingTestimonial.id}`,
           payload
         );
       } else {
@@ -143,7 +143,7 @@ export default function TestimonialsPage() {
     try {
       setSubmitting(true);
       await adminDelete(
-        `/api/v1/admin/testimonials/${deletingTestimonial._id}`
+        `/api/v1/admin/testimonials/${deletingTestimonial.id}`
       );
       setDeleteOpen(false);
       setDeletingTestimonial(null);
@@ -158,7 +158,7 @@ export default function TestimonialsPage() {
   const toggleVerified = async (testimonial: ITestimonial) => {
     try {
       await adminPatch<ApiResponse<ITestimonial>>(
-        `/api/v1/admin/testimonials/${testimonial._id}/verify`,
+        `/api/v1/admin/testimonials/${testimonial.id}/verify`,
         { isVerified: !testimonial.isVerified }
       );
       fetchTestimonials();
@@ -170,7 +170,7 @@ export default function TestimonialsPage() {
   const toggleVisible = async (testimonial: ITestimonial) => {
     try {
       await adminPatch<ApiResponse<ITestimonial>>(
-        `/api/v1/admin/testimonials/${testimonial._id}/visibility`,
+        `/api/v1/admin/testimonials/${testimonial.id}/visibility`,
         { isVisible: !testimonial.isVisible }
       );
       fetchTestimonials();
@@ -251,7 +251,6 @@ export default function TestimonialsPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-white">Testimonials Manager</h1>
@@ -265,7 +264,6 @@ export default function TestimonialsPage() {
         </Button>
       </div>
 
-      {/* Data Table */}
       <DataTable
         data={testimonials}
         columns={columns}
@@ -292,14 +290,12 @@ export default function TestimonialsPage() {
         )}
       />
 
-      {/* Add/Edit Modal */}
       <Modal
         isOpen={formOpen}
         onClose={() => setFormOpen(false)}
         title={editingTestimonial ? 'Edit Testimonial' : 'Add New Testimonial'}
       >
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          {/* Reviewer Name */}
           <div className="flex flex-col gap-1.5">
             <label htmlFor="reviewerName" className="text-sm font-medium text-foreground/80">
               Reviewer Name *
@@ -318,7 +314,6 @@ export default function TestimonialsPage() {
             )}
           </div>
 
-          {/* Location */}
           <div className="flex flex-col gap-1.5">
             <label htmlFor="location" className="text-sm font-medium text-foreground/80">
               Location
@@ -336,7 +331,6 @@ export default function TestimonialsPage() {
             )}
           </div>
 
-          {/* Review Text */}
           <div className="flex flex-col gap-1.5">
             <label htmlFor="reviewText" className="text-sm font-medium text-foreground/80">
               Review Text *
@@ -355,7 +349,6 @@ export default function TestimonialsPage() {
             )}
           </div>
 
-          {/* Rating & Image row */}
           <div className="grid grid-cols-2 gap-3">
             <div className="flex flex-col gap-1.5">
               <label htmlFor="rating" className="text-sm font-medium text-foreground/80">
@@ -392,7 +385,6 @@ export default function TestimonialsPage() {
             </div>
           </div>
 
-          {/* Image */}
           <MediaInput
             label="Reviewer Image"
             value={watch('image') || ''}
@@ -400,7 +392,6 @@ export default function TestimonialsPage() {
             accept="image/jpeg,image/png,image/webp,image/svg+xml"
           />
 
-          {/* Toggles */}
           <div className="flex items-center gap-6">
             <label className="flex items-center gap-2 cursor-pointer">
               <input
@@ -420,14 +411,8 @@ export default function TestimonialsPage() {
             </label>
           </div>
 
-          {/* Submit */}
           <div className="flex justify-end gap-3 pt-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setFormOpen(false)}
-              type="button"
-            >
+            <Button variant="ghost" size="sm" onClick={() => setFormOpen(false)} type="button">
               Cancel
             </Button>
             <Button type="submit" size="sm" loading={submitting}>
@@ -437,7 +422,6 @@ export default function TestimonialsPage() {
         </form>
       </Modal>
 
-      {/* Delete Confirmation Modal */}
       <Modal
         isOpen={deleteOpen}
         onClose={() => setDeleteOpen(false)}
@@ -452,11 +436,7 @@ export default function TestimonialsPage() {
             ? This action cannot be undone.
           </p>
           <div className="flex justify-end gap-3">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setDeleteOpen(false)}
-            >
+            <Button variant="ghost" size="sm" onClick={() => setDeleteOpen(false)}>
               Cancel
             </Button>
             <Button
