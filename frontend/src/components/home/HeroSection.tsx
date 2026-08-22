@@ -42,7 +42,7 @@ export default function HeroSection({ slides }: HeroSectionProps) {
     <section ref={sectionRef} className="relative min-h-[calc(100vh-4rem)] w-full overflow-hidden gowith-gradient bg-[#050914]" aria-label="MeetVia hero">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_75%_45%,rgba(139,92,246,.16),transparent_28%),radial-gradient(circle_at_15%_30%,rgba(34,211,238,.09),transparent_25%)]" />
       <AnimatePresence mode="wait">
-        <motion.div key={currentSlide._id} className="absolute inset-0" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.5 }}>
+        <motion.div key={currentSlide.id} className="absolute inset-0" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.5 }}>
           {currentSlide.backgroundVideo && <video src={currentSlide.backgroundVideo} autoPlay muted loop playsInline className="absolute inset-0 h-full w-full object-cover opacity-20" aria-hidden="true" />}
           {currentSlide.backgroundImage && !currentSlide.backgroundVideo && <div className="absolute inset-0 bg-cover bg-center opacity-20" style={{ backgroundImage: `url(${currentSlide.backgroundImage})` }} aria-hidden="true" />}
           <div className="absolute inset-0 bg-[#050914]/75" />
@@ -53,7 +53,10 @@ export default function HeroSection({ slides }: HeroSectionProps) {
           <div data-hero-copy className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/75 backdrop-blur-xl"><Sparkles className="h-4 w-4 text-violet-300" /> Travel with someone local</div>
           <h1 data-hero-copy className="text-5xl font-semibold leading-[1.02] tracking-[-0.04em] text-white md:text-7xl">Find someone<br /><span className="bg-gradient-to-r from-violet-300 via-fuchsia-300 to-cyan-300 bg-clip-text text-transparent">to go with.</span></h1>
           <p data-hero-copy className="mt-6 max-w-xl text-lg leading-8 text-white/65 md:text-xl">{currentSlide.subtitle || 'Meet trusted companions for city days, travel plans and experiences worth sharing.'}</p>
-          <div data-hero-copy className="mt-8 flex flex-wrap gap-3"><Button href={currentSlide.ctaLink || '#services'} variant="primary" size="lg">{currentSlide.ctaText || 'Explore companions'}</Button><a href="#cities" className="inline-flex items-center rounded-xl border border-white/15 bg-white/5 px-6 py-3 text-sm font-medium text-white backdrop-blur-xl transition hover:bg-white/10">Explore destinations</a></div>
+          <div data-hero-copy className="mt-8 flex flex-wrap gap-3">
+            <Button href={currentSlide.ctaLink || '/companions'} variant="primary" size="lg">{currentSlide.ctaText || 'Explore companions'}</Button>
+            <a href="#cities" className="inline-flex items-center rounded-xl border border-white/15 bg-white/5 px-6 py-3 text-sm font-medium text-white backdrop-blur-xl transition hover:bg-white/10">Explore destinations</a>
+          </div>
           <div data-hero-copy className="mt-8 flex flex-wrap gap-5 text-sm text-white/50"><span className="flex items-center gap-2"><Users className="h-4 w-4" /> Trusted people</span><span className="flex items-center gap-2"><MapPin className="h-4 w-4" /> Local experiences</span></div>
         </div>
         <div className="relative mx-auto h-[420px] w-full max-w-[520px]" aria-hidden="true">
