@@ -1,10 +1,9 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Plus, Pencil, Trash2, Star, Eye, EyeOff } from 'lucide-react';
-import { useForm } from 'react-hook-form';
-import { adminGet, adminPost, adminPut, adminDelete } from '@/lib/api';
-import { IService, ApiResponse } from '@/types';
+import { adminDelete, adminGet, adminPost, adminPut } from '@/lib/api';
+import { ApiResponse, IService } from '@/types';
 import DataTable, { Column } from '@/components/admin/DataTable';
 import MediaInput from '@/components/admin/MediaInput';
 import Modal from '@/components/ui/Modal';
@@ -14,7 +13,7 @@ interface ServiceFormData {
   title: string;
   description: string;
   duration: string;
-  locationType: 'Public' | 'Virtual' | 'Flexible';
+  locationType: IService['locationType'];
   image: string;
   video: string;
   thumbnail: string;
@@ -26,63 +25,41 @@ interface ServiceFormData {
   displayOrder: number;
 }
 
+const emptyForm: ServiceFormData = {
+  title: '', description: '', duration: '', locationType: 'Public', image: '', video: '', thumbnail: '',
+  whatsIncluded: '', buttonText: 'Book Now', buttonLink: '', isFeatured: false, isVisible: true, displayOrder: 0,
+};
+
 export default function ServicesPage() {
   const [services, setServices] = useState<IService[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [formOpen, setFormOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
-  const [editingService, setEditingService] = useState<IService | null>(null);
-  const [deletingService, setDeletingService] = useState<IService | null>(null);
-  const [submitting, setSubmitting] = useState(false);
+  const [editing, setEditing] = useState<IService | null>(null);
+  const [deleting, setDeleting] = useState<IService | null>(null);
+  const [form, setForm] = useState<ServiceFormData>(emptyForm);
+  const [saving, setSaving] = useState(false);
 
-  const {
-    register,
-    handleSubmit,
-    reset,
-    watch,
-    setValue,
-    formState: { errors },
-  } = useForm<ServiceFormData>();
-
-  const fetchServices = useCallback(async () => {
+  const load = useCallback(async () => {
+    setError('');
     try {
       setLoading(true);
-      const res = await adminGet<ApiResponse<IService[]>>('/api/v1/admin/services');
-      setServices(res.data);
-    } catch {
-      // Error handled silently — toast could be added
+      const response = await adminGet<ApiResponse<IService[]>>('/api/v1/admin/services');
+      setServices(response.data || []);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unable to load services.');
     } finally {
       setLoading(false);
     }
   }, []);
 
-  useEffect(() => {
-    fetchServices();
-  }, [fetchServices]);
+  useEffect(() => { void load(); }, [load]);
 
-  const openAddForm = () => {
-    setEditingService(null);
-    reset({
-      title: '',
-      description: '',
-      duration: '',
-      locationType: 'Public',
-      image: '',
-      video: '',
-      thumbnail: '',
-      whatsIncluded: '',
-      buttonText: 'Book Now',
-      buttonLink: '',
-      isFeatured: false,
-      isVisible: true,
-      displayOrder: 0,
-    });
-    setFormOpen(true);
-  };
-
-  const openEditForm = (service: IService) => {
-    setEditingService(service);
-    reset({
+  const openAdd = () => { setEditing(null); setForm(emptyForm); setFormOpen(true); };
+  const openEdit = (service: IService) => {
+    setEditing(service);
+    setForm({
       title: service.title,
       description: service.description,
       duration: service.duration || '',
@@ -100,161 +77,69 @@ export default function ServicesPage() {
     setFormOpen(true);
   };
 
-  const openDeleteConfirm = (service: IService) => {
-    setDeletingService(service);
-    setDeleteOpen(true);
-  };
-
-  const onSubmit = async (data: ServiceFormData) => {
+  const save = async (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!form.title.trim() || !form.description.trim()) return;
+    setSaving(true); setError('');
     try {
-      setSubmitting(true);
       const payload = {
-        ...data,
-        whatsIncluded: data.whatsIncluded
-          .split('\n')
-          .map((s) => s.trim())
-          .filter(Boolean),
-        displayOrder: Number(data.displayOrder),
+        ...form,
+        title: form.title.trim(),
+        description: form.description.trim(),
+        whatsIncluded: form.whatsIncluded.split('\n').map((item) => item.trim()).filter(Boolean),
+        displayOrder: Number(form.displayOrder) || 0,
       };
-
-      if (editingService) {
-        await adminPut<ApiResponse<IService>>(
-          `/api/v1/admin/services/${editingService.id}`,
-          payload
-        );
-      } else {
-        await adminPost<ApiResponse<IService>>('/api/v1/admin/services', payload);
-      }
-
-      setFormOpen(false);
-      fetchServices();
-    } catch {
-      // Error handled silently
-    } finally {
-      setSubmitting(false);
-    }
+      if (editing) await adminPut<ApiResponse<IService>>(`/api/v1/admin/services/${editing.id}`, payload);
+      else await adminPost<ApiResponse<IService>>('/api/v1/admin/services', payload);
+      setFormOpen(false); setEditing(null); setForm(emptyForm); await load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unable to save service.');
+    } finally { setSaving(false); }
   };
 
-  const handleDelete = async () => {
-    if (!deletingService) return;
+  const remove = async () => {
+    if (!deleting) return;
+    setSaving(true); setError('');
     try {
-      setSubmitting(true);
-      await adminDelete(`/api/v1/admin/services/${deletingService.id}`);
-      setDeleteOpen(false);
-      setDeletingService(null);
-      fetchServices();
-    } catch {
-      // Error handled silently
-    } finally {
-      setSubmitting(false);
-    }
+      await adminDelete(`/api/v1/admin/services/${deleting.id}`);
+      setDeleteOpen(false); setDeleting(null); await load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unable to delete service.');
+    } finally { setSaving(false); }
   };
 
   const columns: Column<IService>[] = [
-    {
-      key: 'title',
-      header: 'Title',
-      render: (item) => (
-        <span className="font-medium text-white">{item.title}</span>
-      ),
-    },
-    {
-      key: 'duration',
-      header: 'Duration',
-      render: (item) => item.duration || '—',
-    },
-    {
-      key: 'locationType',
-      header: 'Location',
-      render: (item) => (
-        <span className="text-xs bg-white/10 px-2 py-0.5 rounded-full">
-          {item.locationType}
-        </span>
-      ),
-    },
-    {
-      key: 'isFeatured',
-      header: 'Featured',
-      render: (item) =>
-        item.isFeatured ? (
-          <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-        ) : (
-          <Star className="w-4 h-4 text-white/20" />
-        ),
-    },
-    {
-      key: 'isVisible',
-      header: 'Visible',
-      render: (item) =>
-        item.isVisible ? (
-          <Eye className="w-4 h-4 text-green-400" />
-        ) : (
-          <EyeOff className="w-4 h-4 text-white/30" />
-        ),
-    },
-    {
-      key: 'displayOrder',
-      header: 'Order',
-    },
+    { key: 'title', header: 'Title' },
+    { key: 'locationType', header: 'Location' },
+    { key: 'duration', header: 'Duration', render: (item) => item.duration || '—' },
+    { key: 'isFeatured', header: 'Featured', render: (item) => item.isFeatured ? <Star className="h-4 w-4 text-yellow-400" /> : <Star className="h-4 w-4 text-white/20" /> },
+    { key: 'isVisible', header: 'Visible', render: (item) => item.isVisible ? <Eye className="h-4 w-4 text-green-400" /> : <EyeOff className="h-4 w-4 text-white/30" /> },
   ];
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-20">
-        <div className="w-8 h-8 border-4 border-accent/30 border-t-accent rounded-full animate-spin" />
-      </div>
-    );
-  }
+  if (loading) return <div className="flex items-center justify-center py-20"><div className="h-8 w-8 animate-spin rounded-full border-4 border-accent/30 border-t-accent" /></div>;
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-white">Services Manager</h1>
-          <p className="text-white/60 text-sm mt-1">
-            Manage your service offerings
-          </p>
-        </div>
-        <Button onClick={openAddForm} size="sm">
-          <Plus className="w-4 h-4 mr-1.5" />
-          Add New Service
-        </Button>
-      </div>
+      <div className="flex items-center justify-between"><div><h1 className="text-2xl font-bold text-white">Services Manager</h1><p className="mt-1 text-sm text-white/60">Manage CMS services and public CTAs.</p></div><Button onClick={openAdd} size="sm"><Plus className="mr-1.5 h-4 w-4" />Add Service</Button></div>
+      {error && <div role="alert" className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">{error}</div>}
+      <DataTable data={services} columns={columns} searchKey="title" searchPlaceholder="Search services..." actions={(item) => <><button type="button" onClick={() => openEdit(item)} className="p-1.5 text-white/60 hover:text-accent" aria-label={`Edit ${item.title}`}><Pencil className="h-4 w-4" /></button><button type="button" onClick={() => { setDeleting(item); setDeleteOpen(true); }} className="p-1.5 text-white/60 hover:text-red-400" aria-label={`Delete ${item.title}`}><Trash2 className="h-4 w-4" /></button></>} />
 
-      {/* Data Table */}
-      <DataTable
-        data={services}
-        columns={columns}
-        searchKey="title"
-        searchPlaceholder="Search services..."
-        pageSize={10}
-        actions={(item) => (
-          <>
-            <button
-              onClick={() => openEditForm(item)}
-              className="p-1.5 rounded-theme text-white/60 hover:text-accent hover:bg-white/10 transition-colors"
-              aria-label={`Edit ${item.title}`}
-            >
-              <Pencil className="w-4 h-4" />
-            </button>
-            <button
-              onClick={() => openDeleteConfirm(item)}
-              className="p-1.5 rounded-theme text-white/60 hover:text-red-400 hover:bg-white/10 transition-colors"
-              aria-label={`Delete ${item.title}`}
-            >
-              <Trash2 className="w-4 h-4" />
-            </button>
-          </>
-        )}
-      />
+      <Modal isOpen={formOpen} onClose={() => !saving && setFormOpen(false)} title={editing ? 'Edit Service' : 'Add Service'}>
+        <form onSubmit={save} className="space-y-4">
+          <label className="block text-sm text-white/80">Title<input required value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="mt-1.5 w-full rounded-theme border border-white/10 bg-white/5 px-4 py-2.5 text-white" /></label>
+          <label className="block text-sm text-white/80">Description<textarea required value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={4} className="mt-1.5 w-full rounded-theme border border-white/10 bg-white/5 px-4 py-2.5 text-white" /></label>
+          <div className="grid gap-4 sm:grid-cols-2"><label className="block text-sm text-white/80">Duration<input value={form.duration} onChange={(e) => setForm({ ...form, duration: e.target.value })} className="mt-1.5 w-full rounded-theme border border-white/10 bg-white/5 px-4 py-2.5 text-white" /></label><label className="block text-sm text-white/80">Location<select value={form.locationType} onChange={(e) => setForm({ ...form, locationType: e.target.value as IService['locationType'] })} className="mt-1.5 w-full rounded-theme border border-white/10 bg-white/5 px-4 py-2.5 text-white"><option value="Public">Public</option><option value="Virtual">Virtual</option><option value="Flexible">Flexible</option></select></label></div>
+          <MediaInput label="Image" value={form.image} onChange={(image) => setForm({ ...form, image })} />
+          <MediaInput label="Video" value={form.video} onChange={(video) => setForm({ ...form, video })} accept="video/mp4,video/webm" />
+          <MediaInput label="Thumbnail" value={form.thumbnail} onChange={(thumbnail) => setForm({ ...form, thumbnail })} />
+          <label className="block text-sm text-white/80">What's Included<textarea value={form.whatsIncluded} onChange={(e) => setForm({ ...form, whatsIncluded: e.target.value })} rows={4} placeholder="One item per line" className="mt-1.5 w-full rounded-theme border border-white/10 bg-white/5 px-4 py-2.5 text-white" /></label>
+          <div className="grid gap-4 sm:grid-cols-2"><label className="block text-sm text-white/80">Button Text<input value={form.buttonText} onChange={(e) => setForm({ ...form, buttonText: e.target.value })} className="mt-1.5 w-full rounded-theme border border-white/10 bg-white/5 px-4 py-2.5 text-white" /></label><label className="block text-sm text-white/80">Button Link<input value={form.buttonLink} onChange={(e) => setForm({ ...form, buttonLink: e.target.value })} className="mt-1.5 w-full rounded-theme border border-white/10 bg-white/5 px-4 py-2.5 text-white" /></label></div>
+          <div className="flex flex-wrap gap-5 text-sm text-white/80"><label className="flex items-center gap-2"><input type="checkbox" checked={form.isFeatured} onChange={(e) => setForm({ ...form, isFeatured: e.target.checked })} />Featured</label><label className="flex items-center gap-2"><input type="checkbox" checked={form.isVisible} onChange={(e) => setForm({ ...form, isVisible: e.target.checked })} />Visible</label><label className="flex items-center gap-2">Order<input type="number" min={0} value={form.displayOrder} onChange={(e) => setForm({ ...form, displayOrder: Number(e.target.value) })} className="w-20 rounded-theme border border-white/10 bg-white/5 px-2 py-1.5 text-white" /></label></div>
+          <div className="flex justify-end gap-3"><Button type="button" variant="secondary" onClick={() => setFormOpen(false)} disabled={saving}>Cancel</Button><Button type="submit" loading={saving} disabled={saving}>{editing ? 'Save Changes' : 'Create Service'}</Button></div>
+        </form>
+      </Modal>
 
-      {/* Add/Edit Modal */}
-      <Modal
-        isOpen={formOpen}
-        onClose={() => setFormOpen(false)}
-        title={editingService ? 'Edit Service' : 'Add New Service'}
-      >
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          {/* Title */}
-          <div className="flex flex-col gap-1.5">
+      <Modal isOpen={deleteOpen} onClose={() => !saving && setDeleteOpen(false)} title="Delete Service"><div className="space-y-5"><p className="text-sm text-white/70">Delete <strong className="text-white">{deleting?.title}</strong>? This cannot be undone.</p><div className="flex justify-end gap-3"><Button type="button" variant="secondary" onClick={() => setDeleteOpen(false)} disabled={saving}>Cancel</Button><Button type="button" onClick={remove} loading={saving} disabled={saving}>Delete</Button></div></div></Modal>
+    </div>
+  );
+}
