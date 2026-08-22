@@ -53,7 +53,7 @@ export default function LoginPage() {
     <section className="min-h-[calc(100vh-4rem)] flex items-center justify-center px-4 py-16">
       <div className="w-full max-w-md glass rounded-2xl p-6 sm:p-8 shadow-xl">
         <div className="mb-8">
-          <p className="text-accent text-sm font-semibold uppercase tracking-[0.2em]">GoWith</p>
+          <p className="text-accent text-sm font-semibold uppercase tracking-[0.2em]">MeetVia</p>
           <h1 className="mt-2 text-3xl font-bold text-foreground">Find someone to go with.</h1>
           <p className="mt-2 text-foreground/65">Sign in with a one-time verification code.</p>
         </div>
