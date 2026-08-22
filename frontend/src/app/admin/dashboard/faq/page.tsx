@@ -82,7 +82,7 @@ export default function FAQPage() {
 
       if (editingFaq) {
         await adminPut<ApiResponse<IFAQ>>(
-          `/api/v1/admin/faq/${editingFaq._id}`,
+          `/api/v1/admin/faq/${editingFaq.id}`,
           payload
         );
       } else {
@@ -102,7 +102,7 @@ export default function FAQPage() {
     if (!deletingFaq) return;
     try {
       setSubmitting(true);
-      await adminDelete(`/api/v1/admin/faq/${deletingFaq._id}`);
+      await adminDelete(`/api/v1/admin/faq/${deletingFaq.id}`);
       setDeleteOpen(false);
       setDeletingFaq(null);
       fetchFaqs();
@@ -115,12 +115,12 @@ export default function FAQPage() {
 
   const handleMoveUp = async (faq: IFAQ) => {
     const sorted = [...faqs].sort((a, b) => a.displayOrder - b.displayOrder);
-    const index = sorted.findIndex((f) => f._id === faq._id);
+    const index = sorted.findIndex((f) => f.id === faq.id);
     if (index <= 0) return;
 
     const items = [
-      { id: sorted[index]._id, displayOrder: sorted[index - 1].displayOrder },
-      { id: sorted[index - 1]._id, displayOrder: sorted[index].displayOrder },
+      { id: sorted[index].id, displayOrder: sorted[index - 1].displayOrder },
+      { id: sorted[index - 1].id, displayOrder: sorted[index].displayOrder },
     ];
 
     try {
@@ -133,12 +133,12 @@ export default function FAQPage() {
 
   const handleMoveDown = async (faq: IFAQ) => {
     const sorted = [...faqs].sort((a, b) => a.displayOrder - b.displayOrder);
-    const index = sorted.findIndex((f) => f._id === faq._id);
+    const index = sorted.findIndex((f) => f.id === faq.id);
     if (index < 0 || index >= sorted.length - 1) return;
 
     const items = [
-      { id: sorted[index]._id, displayOrder: sorted[index + 1].displayOrder },
-      { id: sorted[index + 1]._id, displayOrder: sorted[index].displayOrder },
+      { id: sorted[index].id, displayOrder: sorted[index + 1].displayOrder },
+      { id: sorted[index + 1].id, displayOrder: sorted[index].displayOrder },
     ];
 
     try {
