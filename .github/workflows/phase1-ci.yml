@@ -5,6 +5,7 @@ on:
     branches: [migration-stage-0]
   pull_request:
     branches: [migration-stage-0, main]
+  workflow_dispatch:
 
 jobs:
   backend:
