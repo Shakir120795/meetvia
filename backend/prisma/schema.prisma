@@ -107,6 +107,16 @@ enum TripTravelType {
   INTERNATIONAL
 }
 
+enum TravelGroupStatus {
+  OPEN
+  CLOSED
+}
+
+enum TravelGroupMemberStatus {
+  ACTIVE
+  LEFT
+}
+
 model AdminUser {
   id        String   @id @default(cuid())
   email     String   @unique
@@ -143,6 +153,9 @@ model User {
   tripMemberships          TripMember[]
   waitlists                TripWaitlist[]
   checkIns                 TripCheckIn[]
+  createdTravelGroups      TravelGroup[]            @relation("travelGroupCreator")
+  travelGroupMemberships   TravelGroupMember[]
+  tripMessages             TripMessage[]
 
   @@index([status])
   @@map("users")
@@ -584,6 +597,8 @@ model Trip {
   itinerary    ItineraryItem[]
   waitlists    TripWaitlist[]
   checkIns     TripCheckIn[]
+  travelGroups TravelGroup[]
+  messages     TripMessage[]
 
   @@index([ownerId, startAt])
   @@index([countryCode, startAt])
@@ -611,6 +626,7 @@ model ItineraryItem {
   title        String
   description  String?
   location     String?
+  type         String?
   startAt      DateTime?
   endAt        DateTime?
   notes        String?
@@ -651,4 +667,51 @@ model TripCheckIn {
   @@index([tripId, checkedInAt])
   @@index([userId, checkedInAt])
   @@map("trip_check_ins")
+}
+
+model TravelGroup {
+  id          String            @id @default(cuid())
+  tripId      String
+  creatorId   String
+  name        String
+  description String?
+  maxMembers  Int               @default(10)
+  status      TravelGroupStatus @default(OPEN)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  trip        Trip              @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  creator     User              @relation("travelGroupCreator", fields: [creatorId], references: [id], onDelete: Cascade)
+  members     TravelGroupMember[]
+
+  @@index([tripId, status])
+  @@index([creatorId])
+  @@map("travel_groups")
+}
+
+model TravelGroupMember {
+  id        String                   @id @default(cuid())
+  groupId   String
+  userId    String
+  status    TravelGroupMemberStatus  @default(ACTIVE)
+  joinedAt  DateTime                 @default(now())
+  group     TravelGroup              @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  user      User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([groupId, userId])
+  @@index([userId, status])
+  @@map("travel_group_members")
+}
+
+model TripMessage {
+  id        String   @id @default(cuid())
+  tripId    String
+  senderId  String
+  body      String
+  createdAt DateTime @default(now())
+  trip      Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  sender    User     @relation(fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@index([tripId, createdAt])
+  @@index([senderId, createdAt])
+  @@map("trip_messages")
 }
