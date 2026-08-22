@@ -2,21 +2,31 @@
 
 import { useRef, useEffect, useState, useCallback } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ChevronLeft, ChevronRight, MapPin, Users, Sparkles } from 'lucide-react';
+import { ChevronLeft, ChevronRight, MapPin, Users, Sparkles, Search } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import Button from '@/components/ui/Button';
-import { IHeroSlide } from '@/types';
+import { ICity, IService, IHeroSlide } from '@/types';
 
 gsap.registerPlugin(ScrollTrigger);
 
-interface HeroSectionProps { slides: IHeroSlide[]; }
+interface HeroSectionProps {
+  slides: IHeroSlide[];
+  cities: ICity[];
+  services: IService[];
+}
 
-export default function HeroSection({ slides }: HeroSectionProps) {
+export default function HeroSection({ slides, cities, services }: HeroSectionProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [city, setCity] = useState('');
+  const [service, setService] = useState('');
+  const [date, setDate] = useState('');
+  const [time, setTime] = useState('');
   const sectionRef = useRef<HTMLElement>(null);
   const prefersReducedMotion = useReducedMotion();
+  const router = useRouter();
   const currentSlide = slides[currentIndex];
   const hasMultipleSlides = slides.length > 1;
 
@@ -36,10 +46,20 @@ export default function HeroSection({ slides }: HeroSectionProps) {
     return () => ctx.revert();
   }, [prefersReducedMotion, currentIndex]);
 
-  if (!slides.length) return null;
+  const findCompanions = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const params = new URLSearchParams();
+    if (city) params.set('city', city);
+    if (service) params.set('experience', service);
+    if (date) params.set('date', date);
+    if (time) params.set('time', time);
+    router.push(`/companions${params.toString() ? `?${params.toString()}` : ''}`);
+  };
+
+  if (!currentSlide) return null;
 
   return (
-    <section ref={sectionRef} className="relative min-h-[calc(100vh-4rem)] w-full overflow-hidden gowith-gradient bg-[#050914]" aria-label="MeetVia hero">
+    <section ref={sectionRef} className="relative min-h-[calc(100vh-4rem)] w-full overflow-hidden meetvia-gradient bg-[#050914]" aria-label="MeetVia hero">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_75%_45%,rgba(139,92,246,.16),transparent_28%),radial-gradient(circle_at_15%_30%,rgba(34,211,238,.09),transparent_25%)]" />
       <AnimatePresence mode="wait">
         <motion.div key={currentSlide.id} className="absolute inset-0" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.5 }}>
@@ -48,17 +68,43 @@ export default function HeroSection({ slides }: HeroSectionProps) {
           <div className="absolute inset-0 bg-[#050914]/75" />
         </motion.div>
       </AnimatePresence>
-      <div className="relative z-10 mx-auto grid min-h-[calc(100vh-4rem)] max-w-7xl items-center gap-8 px-6 py-16 lg:grid-cols-[1fr_1fr] lg:px-10">
+
+      <div className="relative z-10 mx-auto grid min-h-[calc(100vh-4rem)] max-w-7xl items-center gap-8 px-6 py-12 lg:grid-cols-[1.05fr_0.95fr] lg:px-10 lg:py-16">
         <div className="max-w-2xl">
           <div data-hero-copy className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/75 backdrop-blur-xl"><Sparkles className="h-4 w-4 text-violet-300" /> Travel with someone local</div>
           <h1 data-hero-copy className="text-5xl font-semibold leading-[1.02] tracking-[-0.04em] text-white md:text-7xl">Find someone<br /><span className="bg-gradient-to-r from-violet-300 via-fuchsia-300 to-cyan-300 bg-clip-text text-transparent">to go with.</span></h1>
           <p data-hero-copy className="mt-6 max-w-xl text-lg leading-8 text-white/65 md:text-xl">{currentSlide.subtitle || 'Meet trusted companions for city days, travel plans and experiences worth sharing.'}</p>
-          <div data-hero-copy className="mt-8 flex flex-wrap gap-3">
+
+          <form data-hero-copy onSubmit={findCompanions} className="mt-7 rounded-2xl border border-white/10 bg-black/20 p-3 shadow-2xl backdrop-blur-2xl" aria-label="Find a companion">
+            <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+              <label className="sr-only" htmlFor="hero-city">City</label>
+              <select id="hero-city" value={city} onChange={(event) => setCity(event.target.value)} className="rounded-xl border border-white/10 bg-white/5 px-3 py-3 text-sm text-white outline-none focus:border-cyan-300/50">
+                <option value="" className="bg-slate-900">Any city</option>
+                {cities.map((item) => <option key={item.id} value={item.cityName} className="bg-slate-900">{item.cityName}</option>)}
+              </select>
+              <label className="sr-only" htmlFor="hero-service">Experience</label>
+              <select id="hero-service" value={service} onChange={(event) => setService(event.target.value)} className="rounded-xl border border-white/10 bg-white/5 px-3 py-3 text-sm text-white outline-none focus:border-cyan-300/50">
+                <option value="" className="bg-slate-900">Any experience</option>
+                {services.map((item) => <option key={item.id} value={item.title} className="bg-slate-900">{item.title}</option>)}
+              </select>
+              <label className="sr-only" htmlFor="hero-date">Date</label>
+              <input id="hero-date" type="date" min={new Date().toISOString().slice(0, 10)} value={date} onChange={(event) => setDate(event.target.value)} className="rounded-xl border border-white/10 bg-white/5 px-3 py-3 text-sm text-white outline-none focus:border-cyan-300/50" />
+              <label className="sr-only" htmlFor="hero-time">Time</label>
+              <input id="hero-time" type="time" value={time} onChange={(event) => setTime(event.target.value)} className="rounded-xl border border-white/10 bg-white/5 px-3 py-3 text-sm text-white outline-none focus:border-cyan-300/50" />
+            </div>
+            <div className="mt-2 flex flex-wrap items-center justify-between gap-3">
+              <span className="text-xs text-white/45">Choose a city, experience and preferred time to start your search.</span>
+              <button type="submit" className="inline-flex items-center gap-2 rounded-xl bg-accent px-5 py-3 text-sm font-semibold text-white transition hover:opacity-90"><Search className="h-4 w-4" /> Find companions</button>
+            </div>
+          </form>
+
+          <div data-hero-copy className="mt-5 flex flex-wrap gap-3">
             <Button href={currentSlide.ctaLink || '/companions'} variant="primary" size="lg">{currentSlide.ctaText || 'Explore companions'}</Button>
             <a href="#cities" className="inline-flex items-center rounded-xl border border-white/15 bg-white/5 px-6 py-3 text-sm font-medium text-white backdrop-blur-xl transition hover:bg-white/10">Explore destinations</a>
           </div>
-          <div data-hero-copy className="mt-8 flex flex-wrap gap-5 text-sm text-white/50"><span className="flex items-center gap-2"><Users className="h-4 w-4" /> Trusted people</span><span className="flex items-center gap-2"><MapPin className="h-4 w-4" /> Local experiences</span></div>
+          <div data-hero-copy className="mt-6 flex flex-wrap gap-5 text-sm text-white/50"><span className="flex items-center gap-2"><Users className="h-4 w-4" /> Trusted people</span><span className="flex items-center gap-2"><MapPin className="h-4 w-4" /> Local experiences</span></div>
         </div>
+
         <div className="relative mx-auto h-[420px] w-full max-w-[520px]" aria-hidden="true">
           <div data-hero-float className="absolute left-1/2 top-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/10 bg-gradient-to-br from-violet-500/25 via-slate-900 to-cyan-400/10 shadow-[0_0_100px_rgba(139,92,246,.2)] [transform-style:preserve-3d]" style={{ boxShadow: 'inset -30px -20px 70px rgba(0,0,0,.65), inset 20px 10px 50px rgba(255,255,255,.08)' }}><div className="absolute inset-4 rounded-full border border-white/10" /><div className="absolute inset-10 rounded-full border border-dashed border-violet-300/20" /><div className="absolute left-1/2 top-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-cyan-300 shadow-[0_0_30px_rgba(103,232,249,.8)]" /></div>
           <div data-hero-orbit className="absolute left-1/2 top-1/2 h-[340px] w-[340px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-violet-300/15" />
