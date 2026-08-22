@@ -93,7 +93,7 @@ export default function CitiesPage() {
 
       if (editingCity) {
         await adminPut<ApiResponse<ICity>>(
-          `/api/v1/admin/cities/${editingCity._id}`,
+          `/api/v1/admin/cities/${editingCity.id}`,
           payload
         );
       } else {
@@ -117,7 +117,7 @@ export default function CitiesPage() {
     if (!deletingCity) return;
     try {
       setSubmitting(true);
-      await adminDelete(`/api/v1/admin/cities/${deletingCity._id}`);
+      await adminDelete(`/api/v1/admin/cities/${deletingCity.id}`);
       setDeleteOpen(false);
       setDeletingCity(null);
       fetchCities();
@@ -223,88 +223,54 @@ export default function CitiesPage() {
         title={editingCity ? 'Edit City' : 'Add New City'}
       >
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          {formError && (
-            <div className="bg-red-500/10 border border-red-500/30 rounded-theme px-4 py-3 text-sm text-red-400">
-              {formError}
-            </div>
-          )}
-
-          {/* City Name */}
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="cityName" className="text-sm font-medium text-foreground/80">
-              City Name *
-            </label>
+            <label htmlFor="cityName" className="text-sm font-medium text-foreground/80">City Name *</label>
             <input
               id="cityName"
-              {...register('cityName', {
-                required: 'City name is required',
-                maxLength: { value: 100, message: 'Max 100 characters' },
-              })}
+              {...register('cityName', { required: 'City name is required', validate: (value) => value.trim() !== '' || 'City name cannot be empty' })}
               className="w-full bg-white/5 border border-white/10 rounded-theme px-4 py-2.5 text-foreground placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-accent/50 transition-colors duration-200"
-              placeholder="e.g. Agra"
+              placeholder="Agra"
             />
-            {errors.cityName && (
-              <p className="text-sm text-red-500">{errors.cityName.message}</p>
-            )}
+            {errors.cityName && <p className="text-sm text-red-500">{errors.cityName.message}</p>}
           </div>
 
-          {/* State */}
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="state" className="text-sm font-medium text-foreground/80">
-              State *
-            </label>
+            <label htmlFor="state" className="text-sm font-medium text-foreground/80">State *</label>
             <input
               id="state"
-              {...register('state', {
-                required: 'State is required',
-                maxLength: { value: 100, message: 'Max 100 characters' },
-              })}
+              {...register('state', { required: 'State is required', validate: (value) => value.trim() !== '' || 'State cannot be empty' })}
               className="w-full bg-white/5 border border-white/10 rounded-theme px-4 py-2.5 text-foreground placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-accent/50 transition-colors duration-200"
-              placeholder="e.g. Uttar Pradesh"
+              placeholder="Uttar Pradesh"
             />
-            {errors.state && (
-              <p className="text-sm text-red-500">{errors.state.message}</p>
-            )}
+            {errors.state && <p className="text-sm text-red-500">{errors.state.message}</p>}
           </div>
 
-          {/* Country */}
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="country" className="text-sm font-medium text-foreground/80">
-              Country *
-            </label>
+            <label htmlFor="country" className="text-sm font-medium text-foreground/80">Country *</label>
             <input
               id="country"
-              {...register('country', {
-                required: 'Country is required',
-                maxLength: { value: 100, message: 'Max 100 characters' },
-              })}
+              {...register('country', { required: 'Country is required', validate: (value) => value.trim() !== '' || 'Country cannot be empty' })}
               className="w-full bg-white/5 border border-white/10 rounded-theme px-4 py-2.5 text-foreground placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-accent/50 transition-colors duration-200"
-              placeholder="e.g. India"
+              placeholder="India"
             />
-            {errors.country && (
-              <p className="text-sm text-red-500">{errors.country.message}</p>
-            )}
+            {errors.country && <p className="text-sm text-red-500">{errors.country.message}</p>}
           </div>
 
-          {/* Status & Display Order row */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-4">
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="status" className="text-sm font-medium text-foreground/80">
-                Status *
-              </label>
+              <label htmlFor="status" className="text-sm font-medium text-foreground/80">Status</label>
               <select
                 id="status"
-                {...register('status', { required: 'Status is required' })}
+                {...register('status')}
                 className="w-full bg-white/5 border border-white/10 rounded-theme px-4 py-2.5 text-foreground focus:outline-none focus:ring-2 focus:ring-accent/50 transition-colors duration-200"
               >
                 <option value="active">Active</option>
                 <option value="inactive">Inactive</option>
               </select>
             </div>
+
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="displayOrder" className="text-sm font-medium text-foreground/80">
-                Display Order
-              </label>
+              <label htmlFor="displayOrder" className="text-sm font-medium text-foreground/80">Display Order</label>
               <input
                 id="displayOrder"
                 type="number"
@@ -315,53 +281,26 @@ export default function CitiesPage() {
             </div>
           </div>
 
-          {/* Submit */}
+          {formError && <p className="text-sm text-red-400">{formError}</p>}
+
           <div className="flex justify-end gap-3 pt-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setFormOpen(false)}
-              type="button"
-            >
-              Cancel
-            </Button>
-            <Button type="submit" size="sm" loading={submitting}>
-              {editingCity ? 'Update City' : 'Create City'}
-            </Button>
+            <Button variant="ghost" size="sm" onClick={() => setFormOpen(false)} type="button">Cancel</Button>
+            <Button type="submit" size="sm" loading={submitting}>{editingCity ? 'Update City' : 'Create City'}</Button>
           </div>
         </form>
       </Modal>
 
       {/* Delete Confirmation Modal */}
-      <Modal
-        isOpen={deleteOpen}
-        onClose={() => setDeleteOpen(false)}
-        title="Delete City"
-      >
+      <Modal isOpen={deleteOpen} onClose={() => setDeleteOpen(false)} title="Delete City">
         <div className="space-y-4">
           <p className="text-white/70">
-            Are you sure you want to delete{' '}
-            <span className="font-semibold text-white">
-              {deletingCity?.cityName}, {deletingCity?.state}
-            </span>
+            Are you sure you want to delete the city{' '}
+            <span className="font-semibold text-white">&ldquo;{deletingCity?.cityName}&rdquo;</span>
             ? This action cannot be undone.
           </p>
           <div className="flex justify-end gap-3">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setDeleteOpen(false)}
-            >
-              Cancel
-            </Button>
-            <Button
-              size="sm"
-              onClick={handleDelete}
-              loading={submitting}
-              className="!bg-red-600 hover:!bg-red-700"
-            >
-              Delete
-            </Button>
+            <Button variant="ghost" size="sm" onClick={() => setDeleteOpen(false)}>Cancel</Button>
+            <Button size="sm" onClick={handleDelete} loading={submitting} className="!bg-red-600 hover:!bg-red-700">Delete</Button>
           </div>
         </div>
       </Modal>
