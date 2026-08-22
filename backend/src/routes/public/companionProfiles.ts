@@ -39,18 +39,23 @@ router.get('/', async (req, res, next) => {
     const limit = Math.min(24, Math.max(1, Number(req.query.limit) || 12));
     const skip = (page - 1) * limit;
 
+    const experienceWhere = {
+      status: 'PUBLISHED' as const,
+      ...(city ? { city: { cityName: { contains: city, mode: 'insensitive' as const } } } : {}),
+      ...(experience ? { OR: [
+        { title: { contains: experience, mode: 'insensitive' as const } },
+        { category: { contains: experience, mode: 'insensitive' as const } },
+      ] } : {}),
+    };
+
     const where = {
       status: 'ACTIVE' as const,
       roles: { some: { role: { name: 'COMPANION' as const } } },
-      ...(city ? { experiences: { some: { status: 'PUBLISHED' as const, city: { cityName: { contains: city, mode: 'insensitive' as const } } } } } : {}),
-      ...(experience ? { experiences: { some: { status: 'PUBLISHED' as const, OR: [
-        { title: { contains: experience, mode: 'insensitive' as const } },
-        { category: { contains: experience, mode: 'insensitive' as const } },
-      ] } } } : {}),
+      ...(city || experience ? { experiences: { some: experienceWhere } } : {}),
       ...(availability?.weekday !== undefined ? { availability: { some: {
         isActive: true,
         weekday: availability.weekday,
-        ...(availability.minute !== undefined ? { startMinute: { lte: availability.minute }, endMinute: { gte: availability.minute } } : {}),
+        ...(availability.minute !== undefined ? { startMinute: { lte: availability.minute }, endMinute: { gte: availability.minute } } } : {}),
       } } } : {}),
       ...(q ? {
         OR: [
