@@ -42,7 +42,7 @@ export default function Footer() {
           </div>
           <div className="space-y-4">
             <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider">Follow Us</h3>
-            <div className="flex items-center gap-4">{visibleLinks.map((social) => { const IconComponent = ICON_MAP[social.platform.toLowerCase()] || ICON_MAP[social.iconIdentifier?.toLowerCase()]; if (!IconComponent) return null; return <a key={social._id} href={social.url} target="_blank" rel="noopener noreferrer" aria-label={`Follow us on ${social.platform}`} className="text-foreground/70 hover:text-accent transition-colors"><IconComponent className="w-8 h-8" /></a>; })}</div>
+            <div className="flex items-center gap-4">{visibleLinks.map((social) => { const IconComponent = ICON_MAP[social.platform.toLowerCase()] || ICON_MAP[social.iconIdentifier?.toLowerCase()]; if (!IconComponent) return null; return <a key={social.id} href={social.url} target="_blank" rel="noopener noreferrer" aria-label={`Follow us on ${social.platform}`} className="text-foreground/70 hover:text-accent transition-colors"><IconComponent className="w-8 h-8" /></a>; })}</div>
           </div>
         </div>
         <div className="mt-10 pt-6 border-t border-white/10 text-center"><p className="text-xs text-foreground/50">&copy; {new Date().getFullYear()} MeetVia. All rights reserved.</p></div>
