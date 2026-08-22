@@ -3,13 +3,11 @@
 import Accordion from '@/components/ui/Accordion';
 import { IFAQ } from '@/types';
 
-interface FAQContentProps {
-  faqs: IFAQ[];
-}
+interface FAQContentProps { faqs: IFAQ[]; }
 
 export default function FAQContent({ faqs }: FAQContentProps) {
   const accordionItems = faqs.map((faq) => ({
-    id: faq._id,
+    id: faq.id,
     title: faq.question,
     content: faq.answer,
   }));
