@@ -50,6 +50,16 @@ import adminSiteSettingsRoutes from './routes/admin/siteSettings';
 import adminMediaRoutes from './routes/admin/media';
 
 const app = express();
+
+app.set('query parser', (raw: string): Record<string, string> => {
+  const params = new URLSearchParams(raw);
+  const query: Record<string, string> = {};
+  for (const [key, value] of params.entries()) {
+    if (!(key in query)) query[key] = value;
+  }
+  return query;
+});
+
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
