@@ -15,7 +15,8 @@
     "sourceMap": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["src/*"],
+      "qs": ["src/types/qs"]
     }
   },
   "include": ["src/**/*"],
