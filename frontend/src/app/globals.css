@@ -29,13 +29,13 @@ body {
   font-family: var(--font-family);
 }
 
-/* GoWith travel-companion visual language */
-.gowith-gradient {
+/* MeetVia travel-companion visual language */
+.meetvia-gradient {
   background: radial-gradient(circle at 70% 20%, rgba(139, 92, 246, 0.18), transparent 34%),
     radial-gradient(circle at 20% 80%, rgba(34, 211, 238, 0.12), transparent 32%);
 }
 
-.gowith-glow {
+.meetvia-glow {
   box-shadow: 0 0 80px rgba(139, 92, 246, 0.18), 0 0 30px rgba(34, 211, 238, 0.08);
 }
 
