@@ -15,32 +15,20 @@ export default function BecomeCompanion() {
       <div className="max-w-4xl mx-auto">
         <motion.div initial={{ opacity: 0, y: 30 }} animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }} transition={{ duration: 0.6 }} className="text-center mb-12">
           <h2 className="text-3xl sm:text-4xl font-bold text-primary mb-4">Become a Verified Companion</h2>
-          <p className="text-primary/70 text-lg max-w-2xl mx-auto">Join GoWith as a verified local companion and help visitors explore cities with confidence.</p>
+          <p className="text-primary/70 text-lg max-w-2xl mx-auto">Join MeetVia as a verified local companion and help visitors explore cities with confidence.</p>
         </motion.div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-10">
           <motion.div initial={{ opacity: 0, y: 30 }} animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }} transition={{ duration: 0.5, delay: 0.15 }}>
-            <GlassCard className="p-6 h-full">
-              <div className="flex items-start gap-4">
-                <ShieldCheck className="w-8 h-8 text-accent shrink-0" aria-hidden="true" />
-                <div><h3 className="text-lg font-semibold text-primary mb-2">Verified &amp; Trusted</h3><p className="text-primary/70 text-sm leading-relaxed">Complete identity verification and screening to build trust and credibility.</p></div>
-              </div>
-            </GlassCard>
+            <GlassCard className="p-6 h-full"><div className="flex items-start gap-4"><ShieldCheck className="w-8 h-8 text-accent shrink-0" aria-hidden="true" /><div><h3 className="text-lg font-semibold text-primary mb-2">Verified &amp; Trusted</h3><p className="text-primary/70 text-sm leading-relaxed">Complete identity verification and screening to build trust and credibility.</p></div></div></GlassCard>
           </motion.div>
           <motion.div initial={{ opacity: 0, y: 30 }} animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }} transition={{ duration: 0.5, delay: 0.3 }}>
-            <GlassCard className="p-6 h-full">
-              <div className="flex items-start gap-4">
-                <Clock className="w-8 h-8 text-accent shrink-0" aria-hidden="true" />
-                <div><h3 className="text-lg font-semibold text-primary mb-2">Flexible &amp; Professional</h3><p className="text-primary/70 text-sm leading-relaxed">Offer structured public companionship sessions that fit your availability.</p></div>
-              </div>
-            </GlassCard>
+            <GlassCard className="p-6 h-full"><div className="flex items-start gap-4"><Clock className="w-8 h-8 text-accent shrink-0" aria-hidden="true" /><div><h3 className="text-lg font-semibold text-primary mb-2">Flexible &amp; Professional</h3><p className="text-primary/70 text-sm leading-relaxed">Offer structured public companionship sessions that fit your availability.</p></div></div></GlassCard>
           </motion.div>
         </div>
 
-        <motion.p initial={{ opacity: 0 }} animate={isInView ? { opacity: 1 } : { opacity: 0 }} transition={{ duration: 0.5, delay: 0.4 }} className="text-center text-primary/60 text-sm mb-8">GoWith is a professional public companionship platform, not a dating service.</motion.p>
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }} transition={{ duration: 0.5, delay: 0.5 }} className="text-center">
-          <Button href="/become-companion" variant="primary" size="lg">Become a Companion</Button>
-        </motion.div>
+        <motion.p initial={{ opacity: 0 }} animate={isInView ? { opacity: 1 } : { opacity: 0 }} transition={{ duration: 0.5, delay: 0.4 }} className="text-center text-primary/60 text-sm mb-8">MeetVia is a professional public companionship platform, not a dating service.</motion.p>
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }} transition={{ duration: 0.5, delay: 0.5 }} className="text-center"><Button href="/become-companion" variant="primary" size="lg">Become a Companion</Button></motion.div>
       </div>
     </section>
   );
