@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import prisma from '../../config/db';
 
+const router = Router();
+
 router.get('/:id', async (req, res, next) => {
   try {
     const companion = await prisma.user.findFirst({
