@@ -3,6 +3,8 @@ name: MeetVia Prisma Schema Verify
 on:
   push:
     branches: [migration-stage-0]
+  pull_request:
+    branches: [migration-stage-0]
 
 jobs:
   prisma:
