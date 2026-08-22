@@ -1,7 +1,7 @@
-import 'qs';
+import 'express-serve-static-core';
 
-declare module 'qs' {
-  interface ParsedQs {
-    [key: string]: any;
+declare module 'express-serve-static-core' {
+  interface Request {
+    query: any;
   }
 }
