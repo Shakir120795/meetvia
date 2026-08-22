@@ -35,9 +35,9 @@
 - Hero Admin CMS reads/writes PostgreSQL hero slides with authentication
 - Hero Admin CMS supports create, edit, visibility, delete and reorder
 - Hero Admin CMS ID contract aligned to Prisma `id`
-- How It Works section
+- How It Works section with CMS empty-state handling
 - Safety section
-- Services preview
+- Services preview with CMS empty-state handling
 - Become a Companion section
 - Companion preview reads live active companion profiles from PostgreSQL via `/api/v1/public/companions`
 - Companion API includes published experience/city context
@@ -47,7 +47,7 @@
 - Companion empty state instead of fake hardcoded profiles
 - About section
 - Cities section
-- FAQ preview
+- FAQ preview with CMS empty-state handling
 - Testimonials preview
 - Contact section with MeetVia branding
 - Contact Inquiry backend → PostgreSQL persistence
