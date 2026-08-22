@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { prisma } from '../lib/prisma';
+import prisma from '../lib/prisma';
 
 export type AppRole = 'CUSTOMER' | 'COMPANION' | 'ADMIN';
 
@@ -13,7 +13,7 @@ export function requireRole(...allowedRoles: AppRole[]) {
 
     try {
       const assignments = await prisma.userRoleAssignment.findMany({
-        where: { userId, role: { in: allowedRoles } },
+        where: { userId, role: { name: { in: allowedRoles } } },
         select: { role: true },
       });
 
