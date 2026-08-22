@@ -52,11 +52,18 @@ router.get('/', async (req, res, next) => {
       status: 'ACTIVE' as const,
       roles: { some: { role: { name: 'COMPANION' as const } } },
       ...(city || experience ? { experiences: { some: experienceWhere } } : {}),
-      ...(availability?.weekday !== undefined ? { availability: { some: {
-        isActive: true,
-        weekday: availability.weekday,
-        ...(availability.minute !== undefined ? { startMinute: { lte: availability.minute }, endMinute: { gte: availability.minute } } } : {}),
-      } } } : {}),
+      ...(availability?.weekday !== undefined ? {
+        availability: {
+          some: {
+            isActive: true,
+            weekday: availability.weekday,
+            ...(availability.minute !== undefined ? {
+              startMinute: { lte: availability.minute },
+              endMinute: { gte: availability.minute },
+            } : {}),
+          },
+        },
+      } : {}),
       ...(q ? {
         OR: [
           { profile: { is: { displayName: { contains: q, mode: 'insensitive' as const } } } },
