@@ -1,5 +1,8 @@
 import request from 'supertest';
 
+const mockSendTelegramNotification = jest.fn();
+const mockFormatInquiryNotification = jest.fn();
+
 // Mock Prisma client before importing app
 jest.mock('../../config/db', () => ({
   __esModule: true,
@@ -10,6 +13,12 @@ jest.mock('../../config/db', () => ({
     $connect: jest.fn(),
     $disconnect: jest.fn(),
   },
+}));
+
+jest.mock('../../utils/telegram', () => ({
+  __esModule: true,
+  sendTelegramNotification: (...args: any[]) => mockSendTelegramNotification(...args),
+  formatInquiryNotification: (...args: any[]) => mockFormatInquiryNotification(...args),
 }));
 
 // Mock env config
@@ -42,6 +51,8 @@ describe('POST /api/v1/public/contact', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockFormatInquiryNotification.mockReturnValue('formatted-test-message');
+    mockSendTelegramNotification.mockResolvedValue(undefined);
   });
 
   it('should create a contact inquiry with status "new_status" and return 201', async () => {
@@ -62,6 +73,8 @@ describe('POST /api/v1/public/contact', () => {
     expect(res.body.success).toBe(true);
     expect(res.body.data.message).toBe('Inquiry submitted successfully');
     expect(res.body.data.id).toBe('cuid-contact-001');
+    expect(mockFormatInquiryNotification).toHaveBeenCalledTimes(1);
+    expect(mockSendTelegramNotification).toHaveBeenCalledWith('formatted-test-message');
   });
 
   it('should accept optional fields (mobile, preferredDate)', async () => {
@@ -99,6 +112,7 @@ describe('POST /api/v1/public/contact', () => {
     expect(res.body.error.code).toBe('VALIDATION_ERROR');
     expect(res.body.error.field).toBe('fullName');
     expect(prisma.contactInquiry.create).not.toHaveBeenCalled();
+    expect(mockSendTelegramNotification).not.toHaveBeenCalled();
   });
 
   it('should return 400 when email is invalid', async () => {
@@ -147,7 +161,26 @@ describe('POST /api/v1/public/contact', () => {
     expect(prisma.contactInquiry.create).not.toHaveBeenCalled();
   });
 
-  it('should return 500 on database error', async () => {
+  it('should keep the successful response when Telegram notification fails', async () => {
+    (prisma.contactInquiry.create as jest.Mock).mockResolvedValue({
+      id: 'cuid-contact-telegram-failure',
+      ...validBody,
+      status: 'new_status',
+    });
+    mockSendTelegramNotification.mockRejectedValueOnce(new Error('Telegram unavailable'));
+
+    const res = await request(app)
+      .post('/api/v1/public/contact')
+      .send(validBody);
+
+    expect(res.status).toBe(201);
+    expect(res.body.success).toBe(true);
+    expect(res.body.data.id).toBe('cuid-contact-telegram-failure');
+    expect(prisma.contactInquiry.create).toHaveBeenCalledTimes(1);
+    expect(mockSendTelegramNotification).toHaveBeenCalledTimes(1);
+  });
+
+  it('should return 500 on database error and must not send Telegram', async () => {
     (prisma.contactInquiry.create as jest.Mock).mockRejectedValue(new Error('DB error'));
 
     const res = await request(app)
@@ -156,5 +189,6 @@ describe('POST /api/v1/public/contact', () => {
 
     expect(res.status).toBe(500);
     expect(res.body.success).toBe(false);
+    expect(mockSendTelegramNotification).not.toHaveBeenCalled();
   });
 });
