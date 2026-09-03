@@ -3,6 +3,7 @@ import cors from 'cors';
 import path from 'path';
 import env from './config/env';
 import prisma from './config/db';
+import redis from './config/redis';
 import { errorHandler } from './middleware/errorHandler';
 import publicServicesRoutes from './routes/public/services';
 import publicCitiesRoutes from './routes/public/cities';
@@ -103,6 +104,15 @@ if (env.NODE_ENV !== 'test') {
       process.exit(1);
     }
 
+    // Connect to Redis
+    try {
+      await redis.connect();
+      console.log('Redis connected successfully');
+    } catch (error) {
+      console.error('Redis connection error:', error);
+      console.warn('Redis connection failed, some features may not work properly');
+    }
+
     app.listen(env.PORT, () => {
       console.log(`Server running on port ${env.PORT} in ${env.NODE_ENV} mode`);
     });
@@ -112,7 +122,9 @@ if (env.NODE_ENV !== 'test') {
 
   // Graceful shutdown
   const shutdown = async () => {
+    console.log('Shutting down gracefully...');
     await prisma.$disconnect();
+    await redis.disconnect();
     process.exit(0);
   };
 

@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import { getRequiredStringParam } from '../utils/params';
 import prisma from '../config/db';
 
 /**
@@ -35,9 +36,9 @@ export async function createSocialLink(req: Request, res: Response, next: NextFu
  */
 export async function updateSocialLink(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { id } = req.params;
+    const id = getRequiredStringParam(req.params.id, "ID");
     const socialLink = await prisma.socialLink.update({
-      where: { id },
+      where: { id: getRequiredStringParam(req.params.id, "ID") },
       data: req.body,
     });
     res.status(200).json({ success: true, data: socialLink });
@@ -59,8 +60,8 @@ export async function updateSocialLink(req: Request, res: Response, next: NextFu
  */
 export async function deleteSocialLink(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { id } = req.params;
-    await prisma.socialLink.delete({ where: { id } });
+    const id = getRequiredStringParam(req.params.id, "ID");
+    await prisma.socialLink.delete({ where: { id: getRequiredStringParam(req.params.id, "ID") } });
     res.status(200).json({ success: true, data: { message: 'Social link deleted successfully' } });
   } catch (error: any) {
     if (error.code === 'P2025') {

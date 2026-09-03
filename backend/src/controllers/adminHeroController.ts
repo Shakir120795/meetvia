@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import { getRequiredStringParam } from '../utils/params';
 import prisma from '../config/db';
 
 /**
@@ -48,7 +49,7 @@ export async function updateHeroSlide(
 ): Promise<void> {
   try {
     const slide = await prisma.heroSlide.update({
-      where: { id: req.params.id },
+      where: { id: getRequiredStringParam(req.params.id, "ID") },
       data: req.body,
     });
     res.json({ success: true, data: slide });
@@ -121,7 +122,7 @@ export async function toggleHeroSlideVisibility(
     }
 
     const slide = await prisma.heroSlide.update({
-      where: { id: req.params.id },
+      where: { id: getRequiredStringParam(req.params.id, "ID") },
       data: { isVisible },
     });
     res.json({ success: true, data: slide });
@@ -147,7 +148,7 @@ export async function deleteHeroSlide(
   next: NextFunction
 ): Promise<void> {
   try {
-    await prisma.heroSlide.delete({ where: { id: req.params.id } });
+    await prisma.heroSlide.delete({ where: { id: getRequiredStringParam(req.params.id, "ID") } });
     res.json({ success: true, data: { message: 'Hero slide deleted successfully' } });
   } catch (error: any) {
     if (error.code === 'P2025') {

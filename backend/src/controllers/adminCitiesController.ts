@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import prisma from '../config/db';
+import { getRequiredStringParam } from '../utils/params';
 
 /**
  * Get all cities sorted by displayOrder ascending.
@@ -41,13 +42,22 @@ export async function createCity(req: Request, res: Response, next: NextFunction
  */
 export async function updateCity(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { id } = req.params;
+    const id = getRequiredStringParam(req.params.id, 'City ID');
     const city = await prisma.city.update({
       where: { id },
       data: req.body,
     });
     res.status(200).json({ success: true, data: city });
   } catch (error: any) {
+    // Handle parameter validation errors
+    if (error.message === 'City ID is required') {
+      res.status(400).json({
+        success: false,
+        error: { message: error.message },
+      });
+      return;
+    }
+    
     // Handle Prisma unique constraint violation on update
     if (error.code === 'P2002') {
       res.status(409).json({
@@ -73,10 +83,18 @@ export async function updateCity(req: Request, res: Response, next: NextFunction
  */
 export async function deleteCity(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { id } = req.params;
+    const id = getRequiredStringParam(req.params.id, 'City ID');
     await prisma.city.delete({ where: { id } });
     res.status(200).json({ success: true, data: { message: 'City deleted successfully' } });
   } catch (error: any) {
+    if (error.message === 'City ID is required') {
+      res.status(400).json({
+        success: false,
+        error: { message: error.message },
+      });
+      return;
+    }
+    
     if (error.code === 'P2025') {
       res.status(404).json({
         success: false,

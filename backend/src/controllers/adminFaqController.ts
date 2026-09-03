@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import { getRequiredStringParam } from '../utils/params';
 import prisma from '../config/db';
 
 /**
@@ -51,7 +52,7 @@ export async function createFaq(req: Request, res: Response, next: NextFunction)
  */
 export async function updateFaq(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { id } = req.params;
+    const id = getRequiredStringParam(req.params.id, "ID");
 
     // If question or answer is being updated, reject if whitespace-only
     if (req.body.question !== undefined && req.body.question.trim() === '') {
@@ -71,7 +72,7 @@ export async function updateFaq(req: Request, res: Response, next: NextFunction)
     }
 
     const faq = await prisma.fAQ.update({
-      where: { id },
+      where: { id: getRequiredStringParam(req.params.id, "ID") },
       data: req.body,
     });
 
@@ -127,8 +128,8 @@ export async function reorderFaqs(req: Request, res: Response, next: NextFunctio
  */
 export async function deleteFaq(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { id } = req.params;
-    await prisma.fAQ.delete({ where: { id } });
+    const id = getRequiredStringParam(req.params.id, "ID");
+    await prisma.fAQ.delete({ where: { id: getRequiredStringParam(req.params.id, "ID") } });
     res.status(200).json({ success: true, data: { message: 'FAQ deleted successfully' } });
   } catch (error: any) {
     if (error.code === 'P2025') {

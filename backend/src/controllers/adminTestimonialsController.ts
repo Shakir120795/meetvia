@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import { getRequiredStringParam } from '../utils/params';
 import prisma from '../config/db';
 
 /**
@@ -32,9 +33,9 @@ export async function createTestimonial(req: Request, res: Response, next: NextF
  */
 export async function updateTestimonial(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { id } = req.params;
+    const id = getRequiredStringParam(req.params.id, "ID");
     const testimonial = await prisma.testimonial.update({
-      where: { id },
+      where: { id: getRequiredStringParam(req.params.id, "ID") },
       data: req.body,
     });
     res.status(200).json({ success: true, data: testimonial });
@@ -55,7 +56,7 @@ export async function updateTestimonial(req: Request, res: Response, next: NextF
  */
 export async function toggleVerified(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { id } = req.params;
+    const id = getRequiredStringParam(req.params.id, "ID");
     const { isVerified } = req.body;
 
     if (typeof isVerified !== 'boolean') {
@@ -67,7 +68,7 @@ export async function toggleVerified(req: Request, res: Response, next: NextFunc
     }
 
     const testimonial = await prisma.testimonial.update({
-      where: { id },
+      where: { id: getRequiredStringParam(req.params.id, "ID") },
       data: { isVerified },
     });
 
@@ -89,7 +90,7 @@ export async function toggleVerified(req: Request, res: Response, next: NextFunc
  */
 export async function toggleVisibility(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { id } = req.params;
+    const id = getRequiredStringParam(req.params.id, "ID");
     const { isVisible } = req.body;
 
     if (typeof isVisible !== 'boolean') {
@@ -101,7 +102,7 @@ export async function toggleVisibility(req: Request, res: Response, next: NextFu
     }
 
     const testimonial = await prisma.testimonial.update({
-      where: { id },
+      where: { id: getRequiredStringParam(req.params.id, "ID") },
       data: { isVisible },
     });
 
@@ -123,8 +124,8 @@ export async function toggleVisibility(req: Request, res: Response, next: NextFu
  */
 export async function deleteTestimonial(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { id } = req.params;
-    await prisma.testimonial.delete({ where: { id } });
+    const id = getRequiredStringParam(req.params.id, "ID");
+    await prisma.testimonial.delete({ where: { id: getRequiredStringParam(req.params.id, "ID") } });
     res.status(200).json({ success: true, data: { message: 'Testimonial deleted successfully' } });
   } catch (error: any) {
     if (error.code === 'P2025') {

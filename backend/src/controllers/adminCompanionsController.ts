@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import { getRequiredStringParam } from '../utils/params';
 import prisma from '../config/db';
 
 /**
@@ -30,7 +31,7 @@ export async function getCompanions(req: Request, res: Response, next: NextFunct
  */
 export async function updateCompanion(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { id } = req.params;
+    const id = getRequiredStringParam(req.params.id, "ID");
     const { status, adminNotes } = req.body;
 
     const updateData: Record<string, any> = {};
@@ -38,7 +39,7 @@ export async function updateCompanion(req: Request, res: Response, next: NextFun
     if (adminNotes !== undefined) updateData.adminNotes = adminNotes;
 
     const application = await prisma.companionApplication.update({
-      where: { id },
+      where: { id: getRequiredStringParam(req.params.id, "ID") },
       data: updateData,
     });
 

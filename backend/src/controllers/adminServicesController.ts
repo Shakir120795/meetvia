@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import { getRequiredStringParam } from '../utils/params';
 import prisma from '../config/db';
 
 /**
@@ -32,9 +33,9 @@ export async function createService(req: Request, res: Response, next: NextFunct
  */
 export async function updateService(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { id } = req.params;
+    const id = getRequiredStringParam(req.params.id, "ID");
     const service = await prisma.service.update({
-      where: { id },
+      where: { id: getRequiredStringParam(req.params.id, "ID") },
       data: req.body,
     });
     res.status(200).json({ success: true, data: service });
@@ -55,8 +56,8 @@ export async function updateService(req: Request, res: Response, next: NextFunct
  */
 export async function deleteService(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { id } = req.params;
-    await prisma.service.delete({ where: { id } });
+    const id = getRequiredStringParam(req.params.id, "ID");
+    await prisma.service.delete({ where: { id: getRequiredStringParam(req.params.id, "ID") } });
     res.status(200).json({ success: true, data: { message: 'Service deleted successfully' } });
   } catch (error: any) {
     if (error.code === 'P2025') {

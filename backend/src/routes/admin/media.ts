@@ -3,6 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import { authMiddleware } from '../../middleware/auth';
 import { uploadSingle, getFileCategory } from '../../middleware/upload';
+import { getRequiredStringParam } from '../../utils/params';
 import prisma from '../../config/db';
 
 const router = Router();
@@ -129,7 +130,7 @@ router.delete(
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const media = await prisma.media.findUnique({
-        where: { id: req.params.id },
+        where: { id: getRequiredStringParam(req.params.id, "ID") },
       });
 
       if (!media) {
@@ -152,7 +153,7 @@ router.delete(
       }
 
       // Delete Media record from DB
-      await prisma.media.delete({ where: { id: req.params.id } });
+      await prisma.media.delete({ where: { id: getRequiredStringParam(req.params.id, "ID") } });
 
       res.status(200).json({
         success: true,

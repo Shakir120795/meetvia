@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import { getRequiredStringParam } from '../utils/params';
 import prisma from '../config/db';
 
 /**
@@ -37,7 +38,7 @@ export async function getInquiries(req: Request, res: Response, next: NextFuncti
  */
 export async function updateInquiry(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { id } = req.params;
+    const id = getRequiredStringParam(req.params.id, "ID");
     const { status, adminNotes } = req.body;
 
     const updateData: Record<string, any> = {};
@@ -45,7 +46,7 @@ export async function updateInquiry(req: Request, res: Response, next: NextFunct
     if (adminNotes !== undefined) updateData.adminNotes = adminNotes;
 
     const inquiry = await prisma.contactInquiry.update({
-      where: { id },
+      where: { id: getRequiredStringParam(req.params.id, "ID") },
       data: updateData,
     });
 

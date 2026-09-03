@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import { getRequiredStringParam } from '../utils/params';
 import prisma from '../config/db';
 
 /**
@@ -7,8 +8,8 @@ import prisma from '../config/db';
  */
 export async function getLegalPage(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { slug } = req.params;
-    const page = await prisma.legalPage.findUnique({ where: { slug } });
+    const slug = getRequiredStringParam(req.params.slug, "slug");
+    const page = await prisma.legalPage.findUnique({ where: { slug: getRequiredStringParam(req.params.slug, "slug") } });
 
     if (!page) {
       res.status(404).json({
@@ -30,11 +31,11 @@ export async function getLegalPage(req: Request, res: Response, next: NextFuncti
  */
 export async function updateLegalPage(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { slug } = req.params;
+    const slug = getRequiredStringParam(req.params.slug, "slug");
     const { title, content } = req.body;
 
     const page = await prisma.legalPage.update({
-      where: { slug },
+      where: { slug: getRequiredStringParam(req.params.slug, "slug") },
       data: { title, content },
     });
 
