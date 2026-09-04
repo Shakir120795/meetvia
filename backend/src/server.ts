@@ -13,6 +13,8 @@ import publicPagesRoutes from './routes/public/pages';
 import publicFooterRoutes from './routes/public/footer';
 import publicContactRoutes from './routes/public/contact';
 import publicCompanionRoutes from './routes/public/companion';
+import publicUserAuthRoutes from './routes/public/userAuth';
+import publicCompanionAuthRoutes from './routes/public/companionAuth';
 import publicSiteSettingsRoutes from './routes/public/siteSettings';
 import publicThemeRoutes from './routes/public/theme';
 import publicHeroRoutes from './routes/public/hero';
@@ -32,6 +34,8 @@ import adminCitiesRoutes from './routes/admin/cities';
 import adminThemeRoutes from './routes/admin/theme';
 import adminHeroRoutes from './routes/admin/hero';
 import adminSiteSettingsRoutes from './routes/admin/siteSettings';
+import adminPermissionsRoutes from './routes/admin/permissions';
+import adminFeatureToggleRoutes from './routes/admin/featureToggles';
 import adminMediaRoutes from './routes/admin/media';
 
 const app = express();
@@ -57,6 +61,12 @@ app.use('/api/v1/public/footer', publicFooterRoutes);
 app.use('/api/v1/public/how-it-works', publicHowItWorksRoutes);
 app.use('/api/v1/public/contact', publicContactRoutes);
 app.use('/api/v1/public/companion-application', publicCompanionRoutes);
+app.use('/api/v1/public/user-auth', publicUserAuthRoutes);
+app.use('/api/v1/public/companion-auth', publicCompanionAuthRoutes);
+
+// Import the new config route
+import publicConfigRoutes from './routes/public/config';
+app.use('/api/v1/public', publicConfigRoutes);
 
 // API Routes - Admin (JWT required)
 app.use('/api/v1/admin/auth', adminAuthRoutes);
@@ -75,6 +85,8 @@ app.use('/api/v1/admin/social-links', adminSocialLinksRoutes);
 app.use('/api/v1/admin/inquiries', adminInquiriesRoutes);
 app.use('/api/v1/admin/companions', adminCompanionsRoutes);
 app.use('/api/v1/admin/how-it-works', adminHowItWorksRoutes);
+app.use('/api/v1/admin/permissions', adminPermissionsRoutes);
+app.use('/api/v1/admin/feature-toggles', adminFeatureToggleRoutes);
 
 // Health check endpoint
 app.get('/api/v1/health', (_req, res) => {

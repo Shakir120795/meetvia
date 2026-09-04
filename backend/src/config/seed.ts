@@ -1,5 +1,6 @@
 import prisma from './db';
 import { hashPassword } from '../utils/password';
+import { seedAuthData } from './seedAuth';
 
 async function seedAdminUser(): Promise<void> {
   const count = await prisma.adminUser.count();
@@ -425,6 +426,7 @@ async function seed(): Promise<void> {
     console.log('📦 Connected to PostgreSQL via Prisma\n');
 
     // Run all seed functions
+    await seedAuthData();
     await seedAdminUser();
     await seedThemeSettings();
     await seedHeroSlides();

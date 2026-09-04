@@ -50,17 +50,150 @@ enum ApplicationStatus {
   rejected
 }
 
+enum AuthProvider {
+  email
+  google
+  apple
+  whatsapp
+}
+
+enum OtpPurpose {
+  EMAIL_VERIFICATION
+  PHONE_VERIFICATION  
+  LOGIN
+  PASSWORD_RESET
+}
+
+enum VerificationStatus {
+  PENDING
+  BASIC
+  PREMIUM
+  REJECTED
+  EXPIRED
+}
+
+enum BookingMode {
+  INSTANT
+  ADMIN_APPROVAL_REQUIRED
+}
+
+enum PayoutFrequency {
+  WEEKLY
+  MONTHLY
+}
+
 // ─── Models ──────────────────────────────────────────────────────────────────
 
 model AdminUser {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  password     String
+  name         String
+  createdBy    String?  // References another AdminUser.id
+  isSuperAdmin Boolean  @default(false)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // RBAC relationships
+  permissions AdminRolePermission[]
+
+  @@map("admin_users")
+}
+
+model User {
+  id             String       @id @default(cuid())
+  name           String?
+  email          String?      @unique
+  phone          String?      @unique
+  passwordHash   String?
+  authProvider   AuthProvider @default(email)
+  providerId     String?      // OAuth provider ID
+  emailVerified  Boolean      @default(false)
+  phoneVerified  Boolean      @default(false)
+  isVerified     Boolean      @default(false) // Computed: emailVerified AND phoneVerified
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@map("users")
+}
+
+model Companion {
+  id                   String             @id @default(cuid())
+  name                 String
+  email                String             @unique
+  phone                String?            @unique
+  passwordHash         String
+  bio                  String?
+  profilePhoto         String?
+  cityId               String?
+  gender               String?
+  languagesSpoken      String[]           @default([])
+  servesTourists       Boolean            @default(true)
+  servesLocals         Boolean            @default(false)
+  specializationTags   String[]           @default([])
+  verificationStatus   VerificationStatus @default(PENDING)
+  verificationLevel    String?            // "BASIC" | "PREMIUM"
+  verificationExpiresAt DateTime?
+  reportCount          Int                @default(0)
+  ratingAvg            Float?
+  bookingMode          BookingMode        @default(INSTANT)
+  payoutFrequency      PayoutFrequency    @default(WEEKLY)
+  isActive             Boolean            @default(true)
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+
+  // Relationships
+  city City? @relation(fields: [cityId], references: [id])
+
+  @@map("companions")
+}
+
+model Permission {
+  id    String @id @default(cuid())
+  key   String @unique
+  label String
+
+  // Relationships
+  adminRoles AdminRolePermission[]
+
+  @@map("permissions")
+}
+
+model AdminRolePermission {
+  adminUserId  String
+  permissionId String
+
+  // Relationships
+  adminUser  AdminUser  @relation(fields: [adminUserId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([adminUserId, permissionId])
+  @@map("admin_role_permissions")
+}
+
+model SiteFeatureToggle {
   id        String   @id @default(cuid())
-  email     String   @unique
-  password  String
-  name      String
+  key       String   @unique
+  value     Json     // JSON value for flexibility
+  isEnabled Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@map("admin_users")
+  @@map("site_feature_toggles")
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorType  String   // "USER" | "COMPANION" | "ADMIN"
+  actorId    String
+  action     String   // "LOGIN" | "CREATE" | "UPDATE" | "DELETE" etc
+  targetType String?  // "USER" | "BOOKING" etc
+  targetId   String?
+  ipAddress  String?
+  timestamp  DateTime @default(now())
+
+  @@map("audit_logs")
 }
 
 model SiteSettings {
@@ -188,6 +321,9 @@ model City {
   displayOrder Int        @default(0)
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
+
+  // Phase 1+ relationships
+  companions Companion[]
 
   @@unique([cityName, state])
   @@map("cities")

@@ -5,8 +5,11 @@ import env from '../config/env';
  * Payload stored within a signed JWT token.
  */
 export interface TokenPayload {
-  userId: string;
+  userId?: string;      // For regular users
+  companionId?: string; // For companions  
+  adminUserId?: string; // For admin users
   email: string;
+  userType: 'USER' | 'COMPANION' | 'ADMIN';
 }
 
 /**

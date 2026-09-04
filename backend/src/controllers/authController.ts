@@ -37,7 +37,11 @@ export async function login(req: Request, res: Response, next: NextFunction): Pr
     }
 
     // Sign JWT with userId and email
-    const token = signToken({ userId: user.id, email: user.email });
+    const token = signToken({ 
+      adminUserId: user.id, 
+      email: user.email, 
+      userType: 'ADMIN' 
+    });
 
     // Calculate expiresAt based on JWT_EXPIRY
     const expiresAt = calculateExpiresAt(env.JWT_EXPIRY);
