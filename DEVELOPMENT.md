@@ -38,7 +38,7 @@ chmod +x setup-dev.sh
    
    Create `frontend/.env.local`:
    ```env
-   NEXT_PUBLIC_API_URL=http://localhost:5000/api/v1
+   NEXT_PUBLIC_API_URL=http://localhost:5001/api/v1
    NODE_ENV=development
    ```
 
@@ -79,10 +79,10 @@ chmod +x setup-dev.sh
 
 | Service | URL | Description |
 |---------|-----|-------------|
-| Frontend | http://localhost:3000 | Next.js application |
-| Backend API | http://localhost:5000 | Express.js API |
-| PostgreSQL | localhost:5432 | Database (user: postgres, db: meetvia) |
-| Redis | localhost:6379 | Cache/Sessions |
+| Frontend | http://localhost:5000 | Next.js application |
+| Backend API | http://localhost:5001 | Express.js API |
+| PostgreSQL | localhost:5433 | Database (user: postgres, db: meetvia) |
+| Redis | localhost:6380 | Cache/Sessions |
 
 ## Project Structure
 
@@ -111,8 +111,8 @@ meetvia/
 
 ### Backend (.env)
 ```env
-DATABASE_URL=postgresql://postgres:postgres@localhost:5432/meetvia
-REDIS_URL=redis://localhost:6379
+DATABASE_URL=postgresql://postgres:postgres@localhost:5433/meetvia
+REDIS_URL=redis://localhost:6380
 JWT_SECRET=your-super-secret-jwt-key-change-in-production
 JWT_EXPIRY=24h
 PORT=5000
@@ -123,7 +123,7 @@ MAX_VIDEO_SIZE=100
 
 ### Frontend (.env.local)
 ```env
-NEXT_PUBLIC_API_URL=http://localhost:5000/api/v1
+NEXT_PUBLIC_API_URL=http://localhost:5001/api/v1
 NODE_ENV=development
 ```
 

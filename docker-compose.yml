@@ -9,7 +9,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./postgres-init:/docker-entrypoint-initdb.d
@@ -23,7 +23,7 @@ services:
     image: redis:7-alpine
     restart: always
     ports:
-      - "6379:6379"
+      - "6380:6379"
     volumes:
       - redis_data:/data
     healthcheck:
@@ -38,7 +38,7 @@ services:
       dockerfile: Dockerfile
     restart: always
     ports:
-      - "5000:5000"
+      - "5001:5000"
     environment:
       - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/meetvia
       - JWT_SECRET=your-super-secret-jwt-key-change-in-production
@@ -63,9 +63,9 @@ services:
       dockerfile: Dockerfile
     restart: always
     ports:
-      - "3000:3000"
+      - "5000:3000"
     environment:
-      - NEXT_PUBLIC_API_URL=http://localhost:5000/api/v1
+      - NEXT_PUBLIC_API_URL=http://localhost:5001/api/v1
       - NODE_ENV=development
     depends_on:
       - backend
